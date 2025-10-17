@@ -3,12 +3,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:my_app/bookings/models/booking.dart';
 import 'package:my_app/bookings/providers.dart';
+import 'package:my_app/profile/models/user_profile.dart';
+import 'package:my_app/profile/onboarding/providers.dart';
+import 'package:my_app/profile/providers.dart';
 import 'package:my_app/pros/models/pro.dart';
 import 'package:my_app/pros/providers.dart';
+import 'package:my_app/reviews/models/review.dart';
+import 'package:my_app/reviews/providers.dart';
 import 'package:my_app/services/models/service.dart';
 import 'package:my_app/services/providers.dart';
+import 'package:my_app/tickets/models/ticket.dart';
+import 'package:my_app/tickets/providers.dart';
 import 'package:my_app/ui/ui.dart';
 import 'package:my_app/wallet/models/wallet.dart';
 import 'package:my_app/wallet/providers.dart';
@@ -153,6 +161,12 @@ class AppRouter {
             builder: (context, state) => const KycPage(),
           ),
           GoRoute(
+            path: '/pro-onboarding',
+            name: ProOnboardingPage.routeName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const ProOnboardingPage(),
+          ),
+          GoRoute(
             path: '/admin-approval',
             name: AdminApprovalPendingPage.routeName,
             parentNavigatorKey: _rootNavigatorKey,
@@ -212,109 +226,389 @@ class AppNavigationShell extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
   static const String routeName = 'home';
   @override
-  Widget build(BuildContext context) {
-    return _PageShowcase(
-      title: 'Home',
-      description: 'Overview of activity, recommendations, and quick actions.',
-      icon: Icons.home,
-      children: [
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bookings = ref.watch(bookingsProvider);
+    final reviews = ref.watch(reviewsProvider);
+    final tickets = ref.watch(ticketsProvider);
+
+    Booking? pendingReviewBooking;
+    for (final booking in bookings) {
+      if (booking.status != BookingStatus.completed) {
+        continue;
+      }
+      final hasReview = reviews.any(
+        (review) => review.bookingId == booking.id,
+      );
+      if (!hasReview) {
+        pendingReviewBooking = booking;
+        break;
+      }
+    }
+
+    final openTickets = tickets
+        .where((ticket) => ticket.status == TicketStatus.open)
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final SupportTicket? activeTicket =
+        openTickets.isNotEmpty ? openTickets.first : null;
+
+    Service? pendingService;
+    Pro? pendingPro;
+    if (pendingReviewBooking != null) {
+      pendingService = pendingReviewBooking.serviceId.isEmpty
+          ? null
+          : ref
+              .watch(serviceByIdProvider(pendingReviewBooking.serviceId))
+              .valueOrNull;
+      pendingPro = pendingReviewBooking.proId.isEmpty
+          ? null
+          : ref.watch(proByIdProvider(pendingReviewBooking.proId)).valueOrNull;
+    }
+
+    final children = <Widget>[];
+
+    if (activeTicket != null) {
+      children.add(
         AppCard(
-          title: 'Quick Booking',
-          subtitle: 'Showcase primary and ghost button styles.',
+          title: 'Ticket opened \u2013 we\'ll reach out',
+          trailing: const PillTag(label: 'Support'),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.support_agent,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: AppSpacing.medium),
+              Expanded(
+                child: Text(
+                  'Our care team will follow up regarding your recent review.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (pendingReviewBooking != null) {
+      final bookingForReview = pendingReviewBooking;
+      final localizations = MaterialLocalizations.of(context);
+      final slotDate =
+          localizations.formatMediumDate(bookingForReview.slot);
+      final slotTime = localizations.formatTimeOfDay(
+        TimeOfDay.fromDateTime(bookingForReview.slot),
+        alwaysUse24HourFormat: true,
+      );
+      final slotLabel = '$slotDate \u2022 $slotTime';
+      final serviceTitle =
+          pendingService?.title ?? 'Service ${bookingForReview.serviceId}';
+      final proName =
+          pendingPro?.name ?? 'Professional ${bookingForReview.proId}';
+
+      children.add(
+        AppCard(
+          title: 'How was $serviceTitle?',
+          subtitle: '$proName \u2022 $slotLabel',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Use the primary button for the main action and the ghost variant for secondary choices.',
+                'Share feedback to help us improve future visits.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: AppSpacing.medium),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      label: 'Book now',
-                      expand: true,
-                      onPressed: () {},
+              AppButton(
+                label: 'Leave review',
+                expand: true,
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (sheetContext) => ReviewSheet(
+                      booking: bookingForReview,
                     ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    children.addAll([
+      AppCard(
+        title: 'Quick Booking',
+        subtitle: 'Showcase primary and ghost button styles.',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Use the primary button for the main action and the ghost variant for secondary choices.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: AppSpacing.medium),
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    label: 'Book now',
+                    expand: true,
+                    onPressed: () {},
                   ),
-                  const SizedBox(width: AppSpacing.medium),
-                  Expanded(
-                    child: AppButton(
-                      label: 'See options',
-                      variant: AppButtonVariant.ghost,
-                      expand: true,
-                      onPressed: () {},
-                    ),
+                ),
+                const SizedBox(width: AppSpacing.medium),
+                Expanded(
+                  child: AppButton(
+                    label: 'See options',
+                    variant: AppButtonVariant.ghost,
+                    expand: true,
+                    onPressed: () {},
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      AppCard(
+        title: 'Featured Professional',
+        subtitle: 'Ready to accept bookings today.',
+        trailing: const PillTag(label: 'New'),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const AvatarWithBadge(initials: 'RM', isOnline: true),
+            const SizedBox(width: AppSpacing.medium),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Rene Marshall',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: AppSpacing.small / 2),
+                  const RatingStars(rating: 4.8),
+                  const SizedBox(height: AppSpacing.small),
+                  Text(
+                    'Specialist in all-inclusive home cleaning and organisation.',
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        AppCard(
-          title: 'Featured Professional',
-          subtitle: 'Ready to accept bookings today.',
-          trailing: const PillTag(label: 'New'),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const AvatarWithBadge(initials: 'RM', isOnline: true),
-              const SizedBox(width: AppSpacing.medium),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Rene Marshall',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.small / 2),
-                    const RatingStars(rating: 4.8),
-                    const SizedBox(height: AppSpacing.small),
-                    Text(
-                      'Specialist in all-inclusive home cleaning and organisation.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
+      ),
+      AppCard(
+        title: 'Upcoming Payment',
+        subtitle: 'Here is how price rows align totals to the right.',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const PriceRow(
+              label: 'Premium cleaning session',
+              amount: '\$85.00',
+            ),
+            const SizedBox(height: AppSpacing.small),
+            const PriceRow(label: 'Service fee', amount: '\$5.00'),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.small),
+              child: Divider(),
+            ),
+            PriceRow(
+              label: 'Total due',
+              amount: '\$90.00',
+              trailing: Icon(
+                Icons.lock_clock,
+                color: Theme.of(context).colorScheme.primary,
+                size: 18,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ]);
+
+    return _PageShowcase(
+      title: 'Home',
+      description: 'Overview of activity, recommendations, and quick actions.',
+      icon: Icons.home,
+      children: children,
+    );
+  }
+}
+
+class ReviewSheet extends ConsumerStatefulWidget {
+  const ReviewSheet({super.key, required this.booking});
+
+  final Booking booking;
+
+  @override
+  ConsumerState<ReviewSheet> createState() => _ReviewSheetState();
+}
+
+class _ReviewSheetState extends ConsumerState<ReviewSheet> {
+  final TextEditingController _commentController = TextEditingController();
+  int _rating = 5;
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final comment = _commentController.text.trim();
+    final review = Review(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      bookingId: widget.booking.id,
+      rating: _rating,
+      comment: comment,
+      createdAt: DateTime.now(),
+    );
+    ref.read(reviewsProvider.notifier).addOrUpdate(review);
+    if (_rating < 3) {
+      final ticket = SupportTicket(
+        id: 'ticket-${DateTime.now().microsecondsSinceEpoch}',
+        bookingId: widget.booking.id,
+        createdAt: DateTime.now(),
+        status: TicketStatus.open,
+        reason: comment.isEmpty
+            ? 'Customer reported a $_rating/5 experience.'
+            : comment,
+      );
+      ref.read(ticketsProvider.notifier).addTicket(ticket);
+    }
+    FocusScope.of(context).unfocus();
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final localizations = MaterialLocalizations.of(context);
+    final service = widget.booking.serviceId.isEmpty
+        ? null
+        : ref
+            .watch(serviceByIdProvider(widget.booking.serviceId))
+            .valueOrNull;
+    final pro = widget.booking.proId.isEmpty
+        ? null
+        : ref.watch(proByIdProvider(widget.booking.proId)).valueOrNull;
+    final slotDate = localizations.formatMediumDate(widget.booking.slot);
+    final slotTime = localizations.formatTimeOfDay(
+      TimeOfDay.fromDateTime(widget.booking.slot),
+      alwaysUse24HourFormat: true,
+    );
+    final slotLabel = '$slotDate \u2022 $slotTime';
+    final serviceTitle =
+        service?.title ?? 'Service ${widget.booking.serviceId}';
+    final proName = pro?.name ?? 'Professional ${widget.booking.proId}';
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: AppSpacing.medium,
+          right: AppSpacing.medium,
+          top: AppSpacing.medium,
+          bottom: AppSpacing.medium +
+              MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(999),
                 ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppSpacing.large),
+            Text(
+              'Leave a review',
+              style: theme.textTheme.headlineSmall,
+            ),
+            const SizedBox(height: AppSpacing.small),
+            Text(
+              '$serviceTitle with $proName',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              slotLabel,
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppSpacing.large),
+            Text(
+              'Rating',
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: AppSpacing.small),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) {
+                final value = index + 1;
+                final isSelected = value <= _rating;
+                return IconButton(
+                  iconSize: 32,
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () {
+                    setState(() {
+                      _rating = value;
+                    });
+                  },
+                  icon: Icon(
+                    isSelected ? Icons.star : Icons.star_border,
+                    color: isSelected
+                        ? colorScheme.secondary
+                        : colorScheme.outline,
+                  ),
+                );
+              }),
+            ),
+            Center(
+              child: Text(
+                '$_rating of 5',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.large),
+            Text(
+              'What stood out?',
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: AppSpacing.small),
+            TextField(
+              controller: _commentController,
+              maxLines: 4,
+              textInputAction: TextInputAction.done,
+              decoration: const InputDecoration(
+                hintText: 'Optional – share more about your experience',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.large),
+            AppButton(
+              label: 'Submit review',
+              expand: true,
+              onPressed: _submit,
+            ),
+          ],
         ),
-        AppCard(
-          title: 'Upcoming Payment',
-          subtitle: 'Here is how price rows align totals to the right.',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const PriceRow(
-                label: 'Premium cleaning session',
-                amount: '\$85.00',
-              ),
-              const SizedBox(height: AppSpacing.small),
-              const PriceRow(label: 'Service fee', amount: '\$5.00'),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.small),
-                child: Divider(),
-              ),
-              PriceRow(
-                label: 'Total due',
-                amount: '\$90.00',
-                trailing: Icon(
-                  Icons.lock_clock,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 18,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -473,8 +767,8 @@ class BookingsPage extends ConsumerWidget {
               TabBar(
                 labelStyle: Theme.of(context).textTheme.titleSmall,
                 tabs: const [
-                  Tab(text: 'Upcoming'),
-                  Tab(text: 'Past'),
+                  Tab(text: 'UPCOMING'),
+                  Tab(text: 'PAST'),
                 ],
               ),
               const SizedBox(height: AppSpacing.medium),
@@ -640,61 +934,232 @@ class WalletPage extends ConsumerWidget {
   }
 }
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
   static const String routeName = 'profile';
   @override
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends ConsumerState<ProfilePage> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _emailController;
+  ProviderSubscription<UserProfile>? _profileSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    final profile = ref.read(userProfileProvider);
+    _nameController = TextEditingController(text: profile.name);
+    _phoneController = TextEditingController(text: profile.phone);
+    _emailController = TextEditingController(text: profile.email);
+    _profileSubscription = ref.listenManual<UserProfile>(
+      userProfileProvider,
+      (previous, next) {
+        if (!mounted) {
+          return;
+        }
+        if (previous?.name != next.name) {
+          _nameController.value = TextEditingValue(
+            text: next.name,
+            selection: TextSelection.collapsed(offset: next.name.length),
+          );
+        }
+        if (previous?.phone != next.phone) {
+          _phoneController.value = TextEditingValue(
+            text: next.phone,
+            selection: TextSelection.collapsed(offset: next.phone.length),
+          );
+        }
+        if (previous?.email != next.email) {
+          _emailController.value = TextEditingValue(
+            text: next.email,
+            selection: TextSelection.collapsed(offset: next.email.length),
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _profileSubscription?.close();
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  void _saveProfile() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    ref.read(userProfileProvider.notifier).updateContact(
+          name: _nameController.text.trim(),
+          phone: _phoneController.text.trim(),
+          email: _emailController.text.trim(),
+        );
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profile updated')),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final profile = ref.watch(userProfileProvider);
+    final theme = Theme.of(context);
+
+    final children = <Widget>[
+      AppCard(
+        title: 'Account',
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AvatarWithBadge(
+              initials: _initialsForName(profile.name),
+              isOnline: true,
+            ),
+            const SizedBox(width: AppSpacing.medium),
+            Expanded(
+              child: Text(
+                'Keep your personal details current so bookings and support teams reach you quickly.',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+          ],
+        ),
+      ),
+      AppCard(
+        title: 'Personal details',
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _nameController,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Full name'),
+                validator: (value) =>
+                    value == null || value.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: AppSpacing.small),
+              TextFormField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(labelText: 'Phone number'),
+                validator: (value) =>
+                    value == null || value.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: AppSpacing.small),
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Required';
+                  }
+                  if (!value.contains('@')) {
+                    return 'Enter a valid email';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: AppSpacing.medium),
+              AppButton(
+                label: 'Save changes',
+                expand: true,
+                onPressed: _saveProfile,
+              ),
+            ],
+          ),
+        ),
+      ),
+      AppCard(
+        child: ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('KYC verification'),
+          subtitle: Text(
+            profile.kycSubmitted
+                ? 'Documents submitted for review.'
+                : 'Add identity and address proof to unlock higher limits.',
+          ),
+          trailing: profile.kycSubmitted
+              ? const PillTag(label: 'Submitted')
+              : const Icon(Icons.chevron_right),
+          onTap: () => context.pushNamed(KycPage.routeName),
+        ),
+      ),
+    ];
+
+    if (profile.kycDocuments.isNotEmpty) {
+      children.add(
+        AppCard(
+          title: 'Submitted documents',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'We received ${profile.kycDocuments.length} file(s). You can replace them at any time.',
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: AppSpacing.small),
+              Wrap(
+                spacing: AppSpacing.small,
+                runSpacing: AppSpacing.small,
+                children: profile.kycDocuments
+                    .map(
+                      (path) => PillTag(label: path.split('/').last),
+                    )
+                    .toList(),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (profile.isProCandidate) {
+      children.add(
+        AppCard(
+          title: 'Go pro',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Complete onboarding to start accepting new jobs.',
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: AppSpacing.medium),
+              AppButton(
+                label: 'View onboarding checklist',
+                expand: true,
+                onPressed: () =>
+                    context.pushNamed(ProOnboardingPage.routeName),
+              ),
+              const SizedBox(height: AppSpacing.small),
+              AppButton(
+                label: 'Approval status',
+                variant: AppButtonVariant.ghost,
+                expand: true,
+                onPressed: () =>
+                    context.pushNamed(AdminApprovalPendingPage.routeName),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return _PageShowcase(
       title: 'Profile',
       description:
-          'Profile settings, KYC progress, and preferences will live on this tab.',
+          'Manage your personal details, verification, and professional onboarding.',
       icon: Icons.person,
-      children: [
-        AppCard(
-          title: 'Account owner',
-          child: Row(
-            children: [
-              const AvatarWithBadge(initials: 'AR', isOnline: true),
-              const SizedBox(width: AppSpacing.medium),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Amelia Rogers',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.small / 2),
-                    Text(
-                      'Tap edit to update personal information.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-              AppButton(
-                label: 'Edit',
-                variant: AppButtonVariant.ghost,
-                onPressed: () {},
-              ),
-            ],
-          ),
-        ),
-        AppCard(
-          title: 'Verification',
-          subtitle: 'Use pill tags to show status states.',
-          child: Wrap(
-            spacing: AppSpacing.small,
-            runSpacing: AppSpacing.small,
-            children: const [
-              PillTag(label: 'Email verified'),
-              PillTag(label: 'Phone verified'),
-              PillTag(label: 'KYC pending'),
-            ],
-          ),
-        ),
-      ],
+      children: children,
     );
   }
 }
@@ -1470,12 +1935,15 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
 
             final now = DateTime.now();
             final arrivalWindow = booking.slot.difference(now);
+            final isUpcomingSlot = booking.slot.isAfter(now);
             final showArrivalTag =
                 booking.status == BookingStatus.confirmed &&
-                !arrivalWindow.isNegative &&
+                isUpcomingSlot &&
                 arrivalWindow <= const Duration(minutes: 30);
 
             final status = booking.status;
+            final canStart = status == BookingStatus.confirmed;
+            final canFinish = status == BookingStatus.inProgress;
             final statusIndex = switch (status) {
               BookingStatus.confirmed => 0,
               BookingStatus.inProgress => 1,
@@ -1535,7 +2003,7 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
                           showConnector: true,
                         ),
                         _TimelineStep(
-                          label: 'Completed',
+                          label: 'Done',
                           description: 'Job finished and receipt issued',
                           isCompleted: statusIndex >= 2,
                           isCurrent: statusIndex == 2,
@@ -1545,61 +2013,93 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.medium),
-                  if (status == BookingStatus.confirmed) ...[
-                    AppButton(
-                      label: 'Start job',
-                      expand: true,
-                      onPressed: () => _updateStatus(BookingStatus.inProgress),
+                  if (canStart || canFinish) ...[
+                    AppCard(
+                      title: 'Actions',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (canStart)
+                            AppButton(
+                              label: 'Start job',
+                              expand: true,
+                              onPressed: () =>
+                                  _updateStatus(BookingStatus.inProgress),
+                            ),
+                          if (canFinish)
+                            AppButton(
+                              label: 'Finish job',
+                              expand: true,
+                              onPressed: () =>
+                                  _updateStatus(BookingStatus.completed),
+                            ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: AppSpacing.small),
-                  ],
-                  if (status != BookingStatus.completed)
-                    AppButton(
-                      label: 'Finish job',
-                      variant: AppButtonVariant.ghost,
-                      expand: true,
-                      onPressed: () => _updateStatus(BookingStatus.completed),
-                    ),
-                  if (status != BookingStatus.completed)
                     const SizedBox(height: AppSpacing.medium),
-                  AppCard(
-                    title: 'Price summary',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        PriceRow(
-                          label: 'Base price',
-                          amount: '\$${booking.basePrice.toStringAsFixed(2)}',
-                        ),
-                        if (booking.surcharge > 0) ...[
-                          const SizedBox(height: AppSpacing.small),
+                  ],
+                  if (status != BookingStatus.completed) ...[
+                    AppCard(
+                      title: 'Price summary',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           PriceRow(
-                            label: 'Same-day surcharge',
-                            amount: '\$${booking.surcharge.toStringAsFixed(2)}',
+                            label: 'Base price',
+                            amount: '\$${booking.basePrice.toStringAsFixed(2)}',
+                          ),
+                          if (booking.surcharge > 0) ...[
+                            const SizedBox(height: AppSpacing.small),
+                            PriceRow(
+                              label: 'Same-day surcharge',
+                              amount:
+                                  '\$${booking.surcharge.toStringAsFixed(2)}',
+                            ),
+                          ],
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.small,
+                            ),
+                            child: Divider(),
+                          ),
+                          PriceRow(
+                            label: 'Total due',
+                            amount: '\$${booking.total.toStringAsFixed(2)}',
                           ),
                         ],
-                        const Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: AppSpacing.small,
-                          ),
-                          child: Divider(),
-                        ),
-                        PriceRow(
-                          label: status == BookingStatus.completed
-                              ? 'Total paid'
-                              : 'Total due',
-                          amount: '\$${booking.total.toStringAsFixed(2)}',
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  if (status == BookingStatus.completed) ...[
                     const SizedBox(height: AppSpacing.medium),
+                  ],
+                  if (status == BookingStatus.completed) ...[
                     AppCard(
                       title: 'Receipt',
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          PriceRow(
+                            label: 'Base price',
+                            amount: '\$${booking.basePrice.toStringAsFixed(2)}',
+                          ),
+                          if (booking.surcharge > 0) ...[
+                            const SizedBox(height: AppSpacing.small),
+                            PriceRow(
+                              label: 'Same-day surcharge',
+                              amount:
+                                  '\$${booking.surcharge.toStringAsFixed(2)}',
+                            ),
+                          ],
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.small,
+                            ),
+                            child: Divider(),
+                          ),
+                          PriceRow(
+                            label: 'Total paid',
+                            amount: '\$${booking.total.toStringAsFixed(2)}',
+                          ),
+                          const SizedBox(height: AppSpacing.medium),
                           Text(
                             'Thanks for your business!',
                             style: theme.textTheme.titleMedium,
@@ -1612,6 +2112,7 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.medium),
                   ],
                   const SizedBox(height: AppSpacing.medium),
                   AppCard(
@@ -1653,74 +2154,355 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
   }
 }
 
-class KycPage extends StatelessWidget {
+class KycPage extends ConsumerStatefulWidget {
   const KycPage({super.key});
   static const String routeName = 'kyc';
+
+  @override
+  ConsumerState<KycPage> createState() => _KycPageState();
+}
+
+class _KycPageState extends ConsumerState<KycPage> {
+  final ImagePicker _picker = ImagePicker();
+  bool _isPicking = false;
+
+  Future<void> _pickDocuments() async {
+    if (_isPicking) {
+      return;
+    }
+    setState(() {
+      _isPicking = true;
+    });
+    try {
+      final files = await _picker.pickMultiImage();
+      if (files == null || files.isEmpty) {
+        return;
+      }
+      final profile = ref.read(userProfileProvider);
+      final updated = [...profile.kycDocuments];
+      for (final file in files) {
+        if (file.path.isEmpty) {
+          continue;
+        }
+        if (!updated.contains(file.path)) {
+          updated.add(file.path);
+        }
+      }
+      if (updated.isNotEmpty) {
+        ref.read(userProfileProvider.notifier).updateKycDocuments(updated);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Added ${files.length} document(s).')),
+        );
+      }
+    } on Exception catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to pick images: $error')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPicking = false;
+        });
+      }
+    }
+  }
+
+  void _removeDocument(String path) {
+    final profile = ref.read(userProfileProvider);
+    final filtered = profile.kycDocuments.where((doc) => doc != path).toList();
+    ref.read(userProfileProvider.notifier).updateKycDocuments(filtered);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Document removed')),
+    );
+  }
+
+  void _submitDocuments() {
+    final profile = ref.read(userProfileProvider);
+    if (profile.kycDocuments.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Add at least one document to continue')),
+      );
+      return;
+    }
+    ref.read(userProfileProvider.notifier).markKycSubmitted();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Documents submitted for review')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return _DetailShowcase(
-      title: 'KYC',
-      message:
-          'Capture identity documents and verification steps when the flow is ready.',
-      icon: Icons.verified_user_outlined,
-      children: [
-        AppCard(
-          title: 'Verification progress',
-          subtitle: 'Combine cards and tags to communicate status.',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              PillTag(label: 'ID check complete'),
-              SizedBox(height: AppSpacing.small),
-              PillTag(label: 'Address proof pending'),
-            ],
+    final profile = ref.watch(userProfileProvider);
+    final theme = Theme.of(context);
+    final documents = profile.kycDocuments;
+    final submitted = profile.kycSubmitted;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('KYC submission')),
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.medium),
+        children: [
+          AppCard(
+            title: 'Verification status',
+            trailing: PillTag(label: submitted ? 'Submitted' : 'Draft'),
+            child: Text(
+              submitted
+                  ? 'Our compliance team is reviewing your information. '
+                      'We\'ll notify you once the decision is ready.'
+                  : 'Provide clear photos of a government ID and proof of address to unlock higher booking limits.',
+              style: theme.textTheme.bodyMedium,
+            ),
           ),
-        ),
-        AppCard(
-          title: 'Next step',
-          child: AppButton(
-            label: 'Upload documents',
-            expand: true,
-            onPressed: () {},
+          AppCard(
+            title: 'Upload documents',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Accepts PNG or JPG photos up to 10 MB each.',
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: AppSpacing.medium),
+                AppButton(
+                  label: _isPicking ? 'Picking…' : 'Pick from gallery',
+                  expand: true,
+                  onPressed: _isPicking ? null : _pickDocuments,
+                  leading: _isPicking
+                      ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                        )
+                      : const Icon(Icons.photo_library_outlined, size: 18),
+                ),
+                if (documents.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.medium),
+                  Text(
+                    'Selected files',
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: AppSpacing.small),
+                  ...documents.map(
+                    (path) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(path.split('/').last),
+                          subtitle: Text(path),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline),
+                            onPressed: () => _removeDocument(path),
+                          ),
+                        ),
+                        const Divider(),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-      ],
+          AppCard(
+            child: AppButton(
+              label: submitted ? 'Documents submitted' : 'Submit for review',
+              expand: true,
+              onPressed: submitted ? null : _submitDocuments,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class AdminApprovalPendingPage extends StatelessWidget {
+class ProOnboardingPage extends ConsumerWidget {
+  const ProOnboardingPage({super.key});
+  static const String routeName = 'proOnboarding';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final steps = ref.watch(proOnboardingProvider);
+    final notifier = ref.read(proOnboardingProvider.notifier);
+    final allComplete = steps.every((step) => step.isComplete);
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Pro onboarding')),
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.medium),
+        children: [
+          AppCard(
+            title: 'Progress',
+            trailing: PillTag(label: allComplete ? 'Ready' : 'In progress'),
+            child: Text(
+              allComplete
+                  ? 'All checklist items are complete. Head to approval to finish the process.'
+                  : 'Tick each requirement to unlock access to new client bookings.',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ),
+          AppCard(
+            title: 'Checklist',
+            child: Column(
+              children: steps
+                  .map(
+                    (step) => CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: step.isComplete,
+                      onChanged: (value) =>
+                          notifier.toggleStep(step.id, value ?? false),
+                      title: Text(step.label),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AppButton(
+                  label: 'Go to approval status',
+                  expand: true,
+                  onPressed: allComplete
+                      ? () => context.pushNamed(
+                            AdminApprovalPendingPage.routeName,
+                          )
+                      : null,
+                ),
+                const SizedBox(height: AppSpacing.small),
+                AppButton(
+                  label: 'Reset checklist',
+                  variant: AppButtonVariant.ghost,
+                  expand: true,
+                  onPressed: () => notifier.reset(),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AdminApprovalPendingPage extends ConsumerWidget {
   const AdminApprovalPendingPage({super.key});
   static const String routeName = 'adminApprovalPending';
+
   @override
-  Widget build(BuildContext context) {
-    return _DetailShowcase(
-      title: 'Admin Approval',
-      message:
-          'Display the current approval status while administrators review submissions.',
-      icon: Icons.admin_panel_settings_outlined,
-      children: [
-        AppCard(
-          title: 'Status update',
-          trailing: const PillTag(label: 'Reviewing'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Use pill tags to highlight the current approval stage.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: AppSpacing.medium),
-              AppButton(
-                label: 'Refresh status',
-                variant: AppButtonVariant.ghost,
-                expand: true,
-                onPressed: () {},
-              ),
-            ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(userProfileProvider);
+    final onboardingSteps = ref.watch(proOnboardingProvider);
+    final allStepsComplete =
+        onboardingSteps.isNotEmpty && onboardingSteps.every((s) => s.isComplete);
+    final kycSubmitted = profile.kycSubmitted;
+
+    late final String statusLabel;
+    late final String statusMessage;
+    if (!kycSubmitted) {
+      statusLabel = 'Pending KYC';
+      statusMessage =
+          'Upload your identity documents so our team can begin the review.';
+    } else if (!allStepsComplete) {
+      statusLabel = 'Tasks remaining';
+      statusMessage =
+          'Finish the onboarding checklist to move to the final review.';
+    } else {
+      statusLabel = 'Reviewing';
+      statusMessage =
+          'All paperwork is in. An administrator will reach out within 2 business days.';
+    }
+
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Admin approval')),
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.medium),
+        children: [
+          AppCard(
+            title: 'Current status',
+            trailing: PillTag(label: statusLabel),
+            child: Text(
+              statusMessage,
+              style: theme.textTheme.bodyMedium,
+            ),
           ),
-        ),
-      ],
+          AppCard(
+            title: 'Checklist overview',
+            child: Column(
+              children: [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    kycSubmitted ? Icons.check_circle : Icons.error_outline,
+                    color: kycSubmitted
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.error,
+                  ),
+                  title: const Text('KYC documents'),
+                  subtitle: Text(
+                    kycSubmitted
+                        ? 'Submitted'
+                        : 'Awaiting document submission',
+                  ),
+                ),
+                const Divider(),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    allStepsComplete
+                        ? Icons.check_circle
+                        : Icons.error_outline,
+                    color: allStepsComplete
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.error,
+                  ),
+                  title: const Text('Onboarding checklist'),
+                  subtitle: Text(
+                    allStepsComplete
+                        ? 'Completed'
+                        : 'Additional steps required',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AppButton(
+                  label: 'Refresh status',
+                  expand: true,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text('We\'ll notify you as soon as anything changes.'),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: AppSpacing.small),
+                AppButton(
+                  label: 'Contact support',
+                  variant: AppButtonVariant.ghost,
+                  expand: true,
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -2028,7 +2810,7 @@ class _BookingListItem extends ConsumerWidget {
       title: serviceTitle,
       subtitle: proName,
       trailing: PillTag(label: statusLabel),
-      onTap: () => context.goNamed(
+      onTap: () => context.pushNamed(
         BookingDetailsPage.routeName,
         pathParameters: {'bookingId': booking.id},
       ),
@@ -2171,7 +2953,7 @@ String _bookingStatusLabel(BookingStatus status) {
     case BookingStatus.inProgress:
       return 'In progress';
     case BookingStatus.completed:
-      return 'Completed';
+      return 'Done';
   }
 }
 
