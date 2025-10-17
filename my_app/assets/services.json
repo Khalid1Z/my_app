@@ -1,0 +1,82 @@
+[
+  {
+    "id": "svc_clean_standard",
+    "title": "Standard Home Cleaning",
+    "category": "Cleaning",
+    "durationMin": 120,
+    "basePrice": 75.0,
+    "thumbUrl": "https://picsum.photos/seed/clean1/400/280"
+  },
+  {
+    "id": "svc_clean_deep",
+    "title": "Deep Cleaning Deluxe",
+    "category": "Cleaning",
+    "durationMin": 180,
+    "basePrice": 129.0,
+    "thumbUrl": "https://picsum.photos/seed/clean2/400/280"
+  },
+  {
+    "id": "svc_laundry",
+    "title": "Laundry & Folding",
+    "category": "Lifestyle",
+    "durationMin": 90,
+    "basePrice": 45.0,
+    "thumbUrl": "https://picsum.photos/seed/laundry/400/280"
+  },
+  {
+    "id": "svc_plumbing_inspect",
+    "title": "Plumbing Inspection",
+    "category": "Repairs",
+    "durationMin": 60,
+    "basePrice": 80.0,
+    "thumbUrl": "https://picsum.photos/seed/plumbing/400/280"
+  },
+  {
+    "id": "svc_electrical_fix",
+    "title": "Electrical Fix & Safety",
+    "category": "Repairs",
+    "durationMin": 75,
+    "basePrice": 95.0,
+    "thumbUrl": "https://picsum.photos/seed/electrical/400/280"
+  },
+  {
+    "id": "svc_hvac_tuneup",
+    "title": "HVAC Seasonal Tune-up",
+    "category": "Maintenance",
+    "durationMin": 120,
+    "basePrice": 150.0,
+    "thumbUrl": "https://picsum.photos/seed/hvac/400/280"
+  },
+  {
+    "id": "svc_garden_refresh",
+    "title": "Garden Refresh",
+    "category": "Outdoor",
+    "durationMin": 150,
+    "basePrice": 110.0,
+    "thumbUrl": "https://picsum.photos/seed/garden/400/280"
+  },
+  {
+    "id": "svc_pest_control",
+    "title": "Eco Pest Control",
+    "category": "Maintenance",
+    "durationMin": 90,
+    "basePrice": 135.0,
+    "thumbUrl": "https://picsum.photos/seed/pest/400/280"
+  },
+  {
+    "id": "svc_moving_help",
+    "title": "Moving & Packing Help",
+    "category": "Logistics",
+    "durationMin": 210,
+    "basePrice": 180.0,
+    "thumbUrl": "https://picsum.photos/seed/moving/400/280"
+  },
+  {
+    "id": "svc_pet_care",
+    "title": "Pet Sitting & Care",
+    "category": "Lifestyle",
+    "durationMin": 120,
+    "basePrice": 65.0,
+    "thumbUrl": "https://picsum.photos/seed/petcare/400/280"
+  }
+]

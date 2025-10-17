@@ -1,0 +1,82 @@
+[
+  {
+    "id": "pro_renee",
+    "name": "Renee Marshall",
+    "rating": 4.9,
+    "skills": ["svc_clean_standard", "svc_clean_deep", "svc_laundry"],
+    "photoUrl": "https://picsum.photos/seed/pro1/200",
+    "baseLocation": {"lat": 40.7128, "lng": -74.0060}
+  },
+  {
+    "id": "pro_kara",
+    "name": "Kara Nichols",
+    "rating": 4.7,
+    "skills": ["svc_clean_deep", "svc_garden_refresh"],
+    "photoUrl": "https://picsum.photos/seed/pro2/200",
+    "baseLocation": {"lat": 34.0522, "lng": -118.2437}
+  },
+  {
+    "id": "pro_michael",
+    "name": "Michael Chen",
+    "rating": 4.8,
+    "skills": ["svc_moving_help", "svc_pet_care", "svc_laundry"],
+    "photoUrl": "https://picsum.photos/seed/pro3/200",
+    "baseLocation": {"lat": 41.8781, "lng": -87.6298}
+  },
+  {
+    "id": "pro_lucia",
+    "name": "Lucia Gomez",
+    "rating": 4.6,
+    "skills": ["svc_plumbing_inspect", "svc_electrical_fix", "svc_hvac_tuneup"],
+    "photoUrl": "https://picsum.photos/seed/pro4/200",
+    "baseLocation": {"lat": 29.7604, "lng": -95.3698}
+  },
+  {
+    "id": "pro_steven",
+    "name": "Steven Blake",
+    "rating": 4.5,
+    "skills": ["svc_hvac_tuneup", "svc_pest_control"],
+    "photoUrl": "https://picsum.photos/seed/pro5/200",
+    "baseLocation": {"lat": 33.4484, "lng": -112.0740}
+  },
+  {
+    "id": "pro_ayesha",
+    "name": "Ayesha Patel",
+    "rating": 5.0,
+    "skills": ["svc_garden_refresh", "svc_pet_care"],
+    "photoUrl": "https://picsum.photos/seed/pro6/200",
+    "baseLocation": {"lat": 47.6062, "lng": -122.3321}
+  },
+  {
+    "id": "pro_daniel",
+    "name": "Daniel Brooks",
+    "rating": 4.4,
+    "skills": ["svc_moving_help", "svc_clean_standard"],
+    "photoUrl": "https://picsum.photos/seed/pro7/200",
+    "baseLocation": {"lat": 39.7392, "lng": -104.9903}
+  },
+  {
+    "id": "pro_fiona",
+    "name": "Fiona O'Connor",
+    "rating": 4.8,
+    "skills": ["svc_pest_control", "svc_plumbing_inspect"],
+    "photoUrl": "https://picsum.photos/seed/pro8/200",
+    "baseLocation": {"lat": 32.7767, "lng": -96.7970}
+  },
+  {
+    "id": "pro_samir",
+    "name": "Samir El-Sayed",
+    "rating": 4.9,
+    "skills": ["svc_electrical_fix", "svc_hvac_tuneup"],
+    "photoUrl": "https://picsum.photos/seed/pro9/200",
+    "baseLocation": {"lat": 37.7749, "lng": -122.4194}
+  },
+  {
+    "id": "pro_hannah",
+    "name": "Hannah Wright",
+    "rating": 4.6,
+    "skills": ["svc_pet_care", "svc_clean_standard"],
+    "photoUrl": "https://picsum.photos/seed/pro10/200",
+    "baseLocation": {"lat": 38.9072, "lng": -77.0369}
+  }
+]
