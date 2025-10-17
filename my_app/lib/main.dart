@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_app/bookings/models/booking.dart';
 import 'package:my_app/bookings/providers.dart';
+import 'package:my_app/notifications/models/notification_entry.dart';
+import 'package:my_app/notifications/providers.dart';
 import 'package:my_app/profile/models/user_profile.dart';
 import 'package:my_app/profile/onboarding/providers.dart';
 import 'package:my_app/profile/providers.dart';
@@ -165,6 +167,12 @@ class AppRouter {
             name: ProOnboardingPage.routeName,
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const ProOnboardingPage(),
+          ),
+          GoRoute(
+            path: '/notifications',
+            name: NotificationsPage.routeName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const NotificationsPage(),
           ),
           GoRoute(
             path: '/admin-approval',
@@ -1678,6 +1686,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       status: BookingStatus.confirmed,
     );
     ref.read(bookingsProvider.notifier).addBooking(booking);
+    ref.read(notificationsProvider.notifier).notifyBookingConfirmed(
+          booking: booking,
+          serviceTitle: service.title,
+          proName: pro.name,
+        );
     FocusScope.of(context).unfocus();
     context.pushNamed(
       BookingDetailsPage.routeName,
@@ -2392,6 +2405,121 @@ class ProOnboardingPage extends ConsumerWidget {
   }
 }
 
+class NotificationsPage extends ConsumerStatefulWidget {
+  const NotificationsPage({super.key});
+  static const String routeName = 'notifications';
+
+  @override
+  ConsumerState<NotificationsPage> createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends ConsumerState<NotificationsPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      ref.read(notificationsProvider.notifier).markAllRead();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final notifications = ref.watch(notificationsProvider);
+    final theme = Theme.of(context);
+    if (notifications.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Notifications')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.large),
+            child: Text(
+              'You are all caught up! Major updates will appear here.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge,
+            ),
+          ),
+        ),
+      );
+    }
+    final localizations = MaterialLocalizations.of(context);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Notifications')),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(AppSpacing.medium),
+        itemCount: notifications.length,
+        separatorBuilder: (_, __) =>
+            const SizedBox(height: AppSpacing.small),
+        itemBuilder: (context, index) {
+          final entry = notifications[index];
+          final iconData = _iconForType(entry.type);
+          final iconColor =
+              _colorForType(theme.colorScheme, entry.type);
+          final dateLabel =
+              localizations.formatMediumDate(entry.timestamp);
+          final timeLabel = localizations.formatTimeOfDay(
+            TimeOfDay.fromDateTime(entry.timestamp),
+            alwaysUse24HourFormat: true,
+          );
+          final backgroundColor = entry.isRead
+              ? null
+              : theme.colorScheme.primary.withValues(alpha: 0.08);
+          return Card(
+            color: backgroundColor,
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: iconColor.withValues(alpha: 0.15),
+                child: Icon(iconData, color: iconColor),
+              ),
+              title: Text(entry.title),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(entry.body),
+                  const SizedBox(height: AppSpacing.small / 2),
+                  Text(
+                    '$dateLabel · $timeLabel',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              onTap: entry.isRead
+                  ? null
+                  : () => ref
+                      .read(notificationsProvider.notifier)
+                      .markRead(entry.id),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  static IconData _iconForType(NotificationType type) {
+    switch (type) {
+      case NotificationType.booking:
+        return Icons.event_available;
+      case NotificationType.wallet:
+        return Icons.account_balance_wallet_outlined;
+      case NotificationType.review:
+        return Icons.reviews_outlined;
+    }
+  }
+
+  static Color _colorForType(ColorScheme colorScheme, NotificationType type) {
+    switch (type) {
+      case NotificationType.booking:
+        return colorScheme.primary;
+      case NotificationType.wallet:
+        return colorScheme.secondary;
+      case NotificationType.review:
+        return colorScheme.tertiary;
+    }
+  }
+}
+
 class AdminApprovalPendingPage extends ConsumerWidget {
   const AdminApprovalPendingPage({super.key});
   static const String routeName = 'adminApprovalPending';
@@ -2520,40 +2648,74 @@ class _PageShowcase extends StatelessWidget {
   final List<Widget> children;
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.medium),
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                icon,
-                size: 40,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: AppSpacing.medium),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      appBar: AppBar(
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            Icon(
+              icon,
+              size: 28,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: AppSpacing.medium),
+            Text(title),
+          ],
+        ),
+        actions: [
+          Consumer(
+            builder: (context, ref, _) {
+              final notifications = ref.watch(notificationsProvider);
+              final unreadCount = notifications.where((n) => !n.isRead).length;
+              return IconButton(
+                tooltip: 'Notifications',
+                onPressed: () =>
+                    context.pushNamed(NotificationsPage.routeName),
+                icon: Stack(
+                  clipBehavior: Clip.none,
                   children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.small),
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
+                    const Icon(Icons.notifications_none),
+                    if (unreadCount > 0)
+                      Positioned(
+                        right: -2,
+                        top: -2,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.error,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                          child: Center(
+                            child: Text(
+                              unreadCount > 9 ? '9+' : '$unreadCount',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(color: Colors.white, fontSize: 10),
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-              ),
-            ],
+              );
+            },
           ),
-          const SizedBox(height: AppSpacing.large),
-          ..._addVerticalSpacing(children),
         ],
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.medium),
+          children: [
+            Text(
+              description,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: AppSpacing.large),
+            ..._addVerticalSpacing(children),
+          ],
+        ),
       ),
     );
   }

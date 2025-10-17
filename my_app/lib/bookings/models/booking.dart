@@ -35,4 +35,35 @@ class Booking {
   final double surcharge;
   final double total;
   final BookingStatus status;
+
+  Booking copyWith({
+    String? serviceId,
+    String? proId,
+    DateTime? slot,
+    String? customerName,
+    String? phone,
+    String? street,
+    String? city,
+    PaymentMethod? paymentMethod,
+    double? basePrice,
+    double? surcharge,
+    double? total,
+    BookingStatus? status,
+  }) {
+    return Booking(
+      id: id,
+      serviceId: serviceId ?? this.serviceId,
+      proId: proId ?? this.proId,
+      slot: slot ?? this.slot,
+      customerName: customerName ?? this.customerName,
+      phone: phone ?? this.phone,
+      street: street ?? this.street,
+      city: city ?? this.city,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      basePrice: basePrice ?? this.basePrice,
+      surcharge: surcharge ?? this.surcharge,
+      total: total ?? this.total,
+      status: status ?? this.status,
+    );
+  }
 }

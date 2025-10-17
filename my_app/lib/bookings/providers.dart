@@ -1,11 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:my_app/notifications/providers.dart';
+
 import 'models/booking.dart';
 
 final bookingsProvider = StateNotifierProvider<BookingNotifier, List<Booking>>((
   ref,
 ) {
-  return BookingNotifier();
+  return BookingNotifier(ref);
 });
 
 final bookingByIdProvider = Provider.family<Booking?, String>((ref, bookingId) {
@@ -19,33 +21,44 @@ final bookingByIdProvider = Provider.family<Booking?, String>((ref, bookingId) {
 });
 
 class BookingNotifier extends StateNotifier<List<Booking>> {
-  BookingNotifier() : super(const []);
+  BookingNotifier(this._ref) : super(const []);
+
+  final Ref _ref;
 
   void addBooking(Booking booking) {
     state = [...state, booking];
   }
 
   void updateStatus(String bookingId, BookingStatus status) {
+    final previousState = state;
     state = [
       for (final booking in state)
-        if (booking.id == bookingId)
-          Booking(
-            id: booking.id,
-            serviceId: booking.serviceId,
-            proId: booking.proId,
-            slot: booking.slot,
-            customerName: booking.customerName,
-            phone: booking.phone,
-            street: booking.street,
-            city: booking.city,
-            paymentMethod: booking.paymentMethod,
-            basePrice: booking.basePrice,
-            surcharge: booking.surcharge,
-            total: booking.total,
-            status: status,
-          )
-        else
-          booking,
+        if (booking.id == bookingId) booking.copyWith(status: status) else booking,
     ];
+    Booking? previousBooking;
+    for (final booking in previousState) {
+      if (booking.id == bookingId) {
+        previousBooking = booking;
+        break;
+      }
+    }
+    Booking? updatedBooking;
+    for (final booking in state) {
+      if (booking.id == bookingId) {
+        updatedBooking = booking;
+        break;
+      }
+    }
+    if (previousBooking == null || updatedBooking == null) {
+      return;
+    }
+    final transitionedToCompleted =
+        previousBooking.status != BookingStatus.completed &&
+        updatedBooking.status == BookingStatus.completed;
+    if (transitionedToCompleted) {
+      _ref
+          .read(notificationsProvider.notifier)
+          .notifyReviewRequested(updatedBooking);
+    }
   }
 }

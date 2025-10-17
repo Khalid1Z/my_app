@@ -1,20 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:my_app/notifications/providers.dart';
+
 import 'models/wallet.dart';
 
 final walletProvider =
     StateNotifierProvider<WalletNotifier, WalletState>((ref) {
-  return WalletNotifier();
+  return WalletNotifier(ref);
 });
 
 class WalletNotifier extends StateNotifier<WalletState> {
-  WalletNotifier()
+  WalletNotifier(this._ref)
       : super(
           WalletState(
             balance: 250,
             transactions: const [],
           ),
         );
+
+  final Ref _ref;
 
   void topUp(double amount, {String description = 'Wallet top-up'}) {
     final transaction = WalletTransaction(
@@ -42,5 +46,8 @@ class WalletNotifier extends StateNotifier<WalletState> {
       balance: state.balance - amount,
       transactions: [transaction, ...state.transactions],
     );
+    _ref
+        .read(notificationsProvider.notifier)
+        .notifyWalletCharged(amount: amount, description: description);
   }
 }
