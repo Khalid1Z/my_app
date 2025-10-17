@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,8 +22,10 @@ import 'package:my_app/services/providers.dart';
 import 'package:my_app/tickets/models/ticket.dart';
 import 'package:my_app/tickets/providers.dart';
 import 'package:my_app/ui/ui.dart';
+import 'package:my_app/util/receipt_storage.dart';
 import 'package:my_app/wallet/models/wallet.dart';
 import 'package:my_app/wallet/providers.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -175,6 +179,23 @@ class AppRouter {
             builder: (context, state) => const NotificationsPage(),
           ),
           GoRoute(
+            path: '/receipts/view',
+            name: PdfViewerPage.routeName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) {
+              final args = state.extra is PdfViewerArgs
+                  ? state.extra as PdfViewerArgs
+                  : null;
+              if (args == null || args.filePath.isEmpty) {
+                return const _ServiceDetailMessageView(
+                  title: 'Receipt',
+                  message: 'Unable to open this receipt.',
+                );
+              }
+              return PdfViewerPage(args: args);
+            },
+          ),
+          GoRoute(
             path: '/admin-approval',
             name: AdminApprovalPendingPage.routeName,
             parentNavigatorKey: _rootNavigatorKey,
@@ -313,7 +334,7 @@ class HomePage extends ConsumerWidget {
         TimeOfDay.fromDateTime(bookingForReview.slot),
         alwaysUse24HourFormat: true,
       );
-      final slotLabel = '$slotDate \u2022 $slotTime';
+      final slotLabel = '$slotDate at $slotTime';
       final serviceTitle =
           pendingService?.title ?? 'Service ${bookingForReview.serviceId}';
       final proName =
@@ -322,7 +343,7 @@ class HomePage extends ConsumerWidget {
       children.add(
         AppCard(
           title: 'How was $serviceTitle?',
-          subtitle: '$proName \u2022 $slotLabel',
+          subtitle: '$proName - $slotLabel',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -517,7 +538,7 @@ class _ReviewSheetState extends ConsumerState<ReviewSheet> {
       TimeOfDay.fromDateTime(widget.booking.slot),
       alwaysUse24HourFormat: true,
     );
-    final slotLabel = '$slotDate \u2022 $slotTime';
+    final slotLabel = '$slotDate at $slotTime';
     final serviceTitle =
         service?.title ?? 'Service ${widget.booking.serviceId}';
     final proName = pro?.name ?? 'Professional ${widget.booking.proId}';
@@ -635,38 +656,17 @@ class ServicesPage extends ConsumerWidget {
         : width >= 650
         ? 2
         : 1;
-    return SafeArea(
-      child: Padding(
+    return _AppShellScaffold(
+      title: 'Services',
+      icon: Icons.design_services,
+      body: Padding(
         padding: const EdgeInsets.all(AppSpacing.medium),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.design_services,
-                  size: 40,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: AppSpacing.medium),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Services',
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                      const SizedBox(height: AppSpacing.small),
-                      Text(
-                        'Browse available services. Navigate to details, pros, and scheduling.',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            Text(
+              'Browse available services. Navigate to details, pros, and scheduling.',
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: AppSpacing.large),
             Expanded(
@@ -736,40 +736,19 @@ class BookingsPage extends ConsumerWidget {
     final past =
         bookings.where((booking) => !booking.slot.isAfter(now)).toList()
           ..sort((a, b) => b.slot.compareTo(a.slot));
-    return SafeArea(
-      child: Padding(
+    return _AppShellScaffold(
+      title: 'Bookings',
+      icon: Icons.event_note,
+      body: Padding(
         padding: const EdgeInsets.all(AppSpacing.medium),
         child: DefaultTabController(
           length: 2,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.event_note,
-                    size: 40,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: AppSpacing.medium),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Bookings',
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                        const SizedBox(height: AppSpacing.small),
-                        Text(
-                          'Keep track of upcoming visits and review completed ones.',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              Text(
+                'Keep track of upcoming visits and review completed ones.',
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: AppSpacing.large),
               TabBar(
@@ -814,33 +793,15 @@ class WalletPage extends ConsumerWidget {
     final theme = Theme.of(context);
     final balanceText = '\$${wallet.balance.toStringAsFixed(2)}';
 
-    return SafeArea(
-      child: ListView(
+    return _AppShellScaffold(
+      title: 'Wallet',
+      icon: Icons.account_balance_wallet,
+      body: ListView(
         padding: const EdgeInsets.all(AppSpacing.medium),
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.account_balance_wallet,
-                size: 40,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: AppSpacing.medium),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Wallet', style: theme.textTheme.headlineMedium),
-                    const SizedBox(height: AppSpacing.small),
-                    Text(
-                      'Manage balance and review recent wallet activity.',
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          Text(
+            'Manage balance and review recent wallet activity.',
+            style: theme.textTheme.bodyLarge,
           ),
           const SizedBox(height: AppSpacing.large),
           AppCard(
@@ -917,7 +878,7 @@ class WalletPage extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: AppSpacing.small / 2),
                                 Text(
-                                  '$timestamp • $time',
+                                  '${timestamp} at $time',
                                   style: theme.textTheme.bodySmall,
                                 ),
                               ],
@@ -1892,6 +1853,7 @@ class BookingDetailsPage extends ConsumerStatefulWidget {
 
 class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
   Timer? _timer;
+  bool _isGeneratingReceipt = false;
 
   @override
   void initState() {
@@ -1911,6 +1873,149 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
 
   void _updateStatus(BookingStatus status) {
     ref.read(bookingsProvider.notifier).updateStatus(widget.bookingId, status);
+  }
+
+  Future<void> _completeBooking({
+    required Booking booking,
+    required Service service,
+    required Pro pro,
+  }) async {
+    if (_isGeneratingReceipt) {
+      return;
+    }
+    setState(() => _isGeneratingReceipt = true);
+    try {
+      ref
+          .read(bookingsProvider.notifier)
+          .updateStatus(widget.bookingId, BookingStatus.completed);
+      final receiptPath = await _generateReceiptPdf(
+        booking: booking.copyWith(status: BookingStatus.completed),
+        service: service,
+        pro: pro,
+      );
+      if (!mounted) {
+        return;
+      }
+      if (kIsWeb) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Receipt downloaded. Check your browser downloads.'),
+          ),
+        );
+        return;
+      }
+      if (receiptPath.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Receipt saved.')),
+        );
+        return;
+      }
+      context.pushNamed(
+        PdfViewerPage.routeName,
+        extra: PdfViewerArgs(
+          filePath: receiptPath,
+          title: '${service.title} receipt',
+        ),
+      );
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unable to create receipt: $error')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGeneratingReceipt = false);
+      }
+    }
+  }
+
+  Future<String> _generateReceiptPdf({
+    required Booking booking,
+    required Service service,
+    required Pro pro,
+  }) async {
+    final doc = pw.Document();
+    final slot = booking.slot.toLocal();
+    String _twoDigits(int value) => value.toString().padLeft(2, '0');
+    final dateLabel =
+        '${slot.year}-${_twoDigits(slot.month)}-${_twoDigits(slot.day)}';
+    final timeLabel =
+        '${_twoDigits(slot.hour)}:${_twoDigits(slot.minute)}';
+
+    doc.addPage(
+      pw.Page(
+        build: (context) {
+          return pw.Padding(
+            padding: const pw.EdgeInsets.all(24),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  'Service Receipt',
+                  style: pw.TextStyle(
+                    fontSize: 24,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 16),
+                pw.Text('Booking ID: ${booking.id}'),
+                pw.Text('Customer: ${booking.customerName}'),
+                pw.Text('Service: ${service.title}'),
+                pw.Text('Professional: ${pro.name}'),
+                pw.Text('Scheduled: $dateLabel at $timeLabel'),
+                pw.SizedBox(height: 24),
+                pw.Divider(),
+                pw.SizedBox(height: 12),
+                pw.Text('Charges', style: pw.TextStyle(fontSize: 16)),
+                pw.SizedBox(height: 8),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('Base price'),
+                    pw.Text('\$${booking.basePrice.toStringAsFixed(2)}'),
+                  ],
+                ),
+                if (booking.surcharge > 0) ...[
+                  pw.SizedBox(height: 4),
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text('Surcharge'),
+                      pw.Text('\$${booking.surcharge.toStringAsFixed(2)}'),
+                    ],
+                  ),
+                ],
+                pw.SizedBox(height: 8),
+                pw.Divider(),
+                pw.SizedBox(height: 8),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      'Total paid',
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      '\$${booking.total.toStringAsFixed(2)}',
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                  ],
+                ),
+                pw.SizedBox(height: 24),
+                pw.Text(
+                  'Thank you for choosing our services!',
+                  style: pw.TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    final bytes = await doc.save();
+    return saveReceipt(bytes, booking.id);
   }
 
   @override
@@ -1957,6 +2062,8 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
             final status = booking.status;
             final canStart = status == BookingStatus.confirmed;
             final canFinish = status == BookingStatus.inProgress;
+            final hasDetails = service != null && pro != null;
+            final finishLabel = _isGeneratingReceipt ? 'Generating receipt...' : 'Finish job';
             final statusIndex = switch (status) {
               BookingStatus.confirmed => 0,
               BookingStatus.inProgress => 1,
@@ -2039,12 +2146,19 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
                               onPressed: () =>
                                   _updateStatus(BookingStatus.inProgress),
                             ),
+                          if (canStart && canFinish)
+                            const SizedBox(height: AppSpacing.small),
                           if (canFinish)
                             AppButton(
-                              label: 'Finish job',
+                              label: finishLabel,
                               expand: true,
-                              onPressed: () =>
-                                  _updateStatus(BookingStatus.completed),
+                              onPressed: !_isGeneratingReceipt && hasDetails
+                                  ? () => _completeBooking(
+                                        booking: booking,
+                                        service: service!,
+                                        pro: pro!,
+                                      )
+                                  : null,
                             ),
                         ],
                       ),
@@ -2277,7 +2391,7 @@ class _KycPageState extends ConsumerState<KycPage> {
                 ),
                 const SizedBox(height: AppSpacing.medium),
                 AppButton(
-                  label: _isPicking ? 'Picking…' : 'Pick from gallery',
+                  label: _isPicking ? 'Picking...' : 'Pick from gallery',
                   expand: true,
                   onPressed: _isPicking ? null : _pickDocuments,
                   leading: _isPicking
@@ -2520,6 +2634,35 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   }
 }
 
+class PdfViewerArgs {
+  const PdfViewerArgs({required this.filePath, this.title});
+
+  final String filePath;
+  final String? title;
+}
+
+class PdfViewerPage extends StatelessWidget {
+  const PdfViewerPage({super.key, required this.args});
+
+  static const String routeName = 'receiptViewer';
+
+  final PdfViewerArgs args;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(args.title ?? 'Receipt')),
+      body: PDFView(
+        filePath: args.filePath,
+        enableSwipe: true,
+        pageFling: true,
+        pageSnap: true,
+        autoSpacing: true,
+      ),
+    );
+  }
+}
+
 class AdminApprovalPendingPage extends ConsumerWidget {
   const AdminApprovalPendingPage({super.key});
   static const String routeName = 'adminApprovalPending';
@@ -2635,19 +2778,20 @@ class AdminApprovalPendingPage extends ConsumerWidget {
   }
 }
 
-class _PageShowcase extends StatelessWidget {
-  const _PageShowcase({
+class _AppShellScaffold extends StatelessWidget {
+  const _AppShellScaffold({
     required this.title,
-    required this.description,
     required this.icon,
-    required this.children,
+    required this.body,
   });
+
   final String title;
-  final String description;
   final IconData icon;
-  final List<Widget> children;
+  final Widget body;
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
@@ -2656,7 +2800,7 @@ class _PageShowcase extends StatelessWidget {
             Icon(
               icon,
               size: 28,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: AppSpacing.medium),
             Text(title),
@@ -2666,7 +2810,8 @@ class _PageShowcase extends StatelessWidget {
           Consumer(
             builder: (context, ref, _) {
               final notifications = ref.watch(notificationsProvider);
-              final unreadCount = notifications.where((n) => !n.isRead).length;
+              final unreadCount =
+                  notifications.where((entry) => !entry.isRead).length;
               return IconButton(
                 tooltip: 'Notifications',
                 onPressed: () =>
@@ -2682,17 +2827,21 @@ class _PageShowcase extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.error,
+                            color: colorScheme.error,
                             shape: BoxShape.circle,
                           ),
-                          constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                          constraints:
+                              const BoxConstraints(minWidth: 18, minHeight: 18),
                           child: Center(
                             child: Text(
                               unreadCount > 9 ? '9+' : '$unreadCount',
                               style: Theme.of(context)
                                   .textTheme
                                   .labelSmall
-                                  ?.copyWith(color: Colors.white, fontSize: 10),
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                  ),
                             ),
                           ),
                         ),
@@ -2704,18 +2853,37 @@ class _PageShowcase extends StatelessWidget {
           ),
         ],
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.medium),
-          children: [
-            Text(
-              description,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: AppSpacing.large),
-            ..._addVerticalSpacing(children),
-          ],
-        ),
+      body: SafeArea(child: body),
+    );
+  }
+}
+
+class _PageShowcase extends StatelessWidget {
+  const _PageShowcase({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.children,
+  });
+  final String title;
+  final String description;
+  final IconData icon;
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) {
+    return _AppShellScaffold(
+      title: title,
+      icon: icon,
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.medium),
+        children: [
+          Text(
+            description,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          const SizedBox(height: AppSpacing.large),
+          ..._addVerticalSpacing(children),
+        ],
       ),
     );
   }
