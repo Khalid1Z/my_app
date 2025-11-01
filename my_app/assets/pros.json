@@ -1,82 +1,388 @@
 [
   {
-    "id": "pro_renee",
-    "name": "Renee Marshall",
+    "id": "pro_amina",
+    "name": "Amina El Fassi",
     "rating": 4.9,
-    "skills": ["svc_clean_standard", "svc_clean_deep", "svc_laundry"],
-    "photoUrl": "https://picsum.photos/seed/pro1/200",
-    "baseLocation": {"lat": 40.7128, "lng": -74.0060}
+    "skills": [
+      "svc_est_epilation_duvet",
+      "svc_est_epilation_narines",
+      "svc_est_epilation_menton",
+      "svc_est_epilation_visage",
+      "svc_est_epilation_aisselles",
+      "svc_est_epilation_jambes",
+      "svc_est_epilation_demi_jambes",
+      "svc_est_epilation_bras",
+      "svc_est_epilation_demi_bras",
+      "svc_est_epilation_maillot_simple",
+      "svc_est_epilation_bords_maillot",
+      "svc_est_epilation_ventre",
+      "svc_est_epilation_dos",
+      "svc_est_epilation_fessier",
+      "svc_est_epilation_orteils",
+      "svc_beauty_waxing_pro_mastery_workshop",
+      "svc_beauty_waxing_pro_studio_setup"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro1/200",
+    "baseLocation": {
+      "lat": 33.5899,
+      "lng": -7.6039
+    }
   },
   {
-    "id": "pro_kara",
-    "name": "Kara Nichols",
+    "id": "pro_salma",
+    "name": "Salma Kabbaj",
+    "rating": 4.8,
+    "skills": [
+      "svc_est_manicure_classic",
+      "svc_est_manicure_spa",
+      "svc_est_vernis_normal",
+      "svc_est_vernis_permanent",
+      "svc_est_vernis_depose",
+      "svc_est_faux_ongles",
+      "svc_est_gel_ongles",
+      "svc_est_gel_permanent",
+      "svc_est_gel_biab",
+      "svc_est_remplissage_gel",
+      "svc_est_polygel",
+      "svc_est_acrylique",
+      "svc_est_pedicure",
+      "svc_est_pedicure_spa",
+      "svc_est_pedicure_medicale",
+      "svc_beauty_manicure_pro_art_masterclass",
+      "svc_beauty_manicure_pro_salon_coaching"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro2/200",
+    "baseLocation": {
+      "lat": 34.0209,
+      "lng": -6.8416
+    }
+  },
+  {
+    "id": "pro_hiba",
+    "name": "Hiba Cherkaoui",
     "rating": 4.7,
-    "skills": ["svc_clean_deep", "svc_garden_refresh"],
-    "photoUrl": "https://picsum.photos/seed/pro2/200",
-    "baseLocation": {"lat": 34.0522, "lng": -118.2437}
+    "skills": [
+      "svc_est_makeup_flash",
+      "svc_est_makeup_day",
+      "svc_est_makeup_evening",
+      "svc_est_makeup_wedding",
+      "svc_est_cils_naturel",
+      "svc_est_cils_glamour",
+      "svc_est_cils_russe",
+      "svc_est_cils_bouquet",
+      "svc_est_cils_depose",
+      "svc_est_teinture_sourcils",
+      "svc_est_teinture_cils"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro3/200",
+    "baseLocation": {
+      "lat": 31.6295,
+      "lng": -7.9811
+    }
   },
   {
-    "id": "pro_michael",
-    "name": "Michael Chen",
-    "rating": 4.8,
-    "skills": ["svc_moving_help", "svc_pet_care", "svc_laundry"],
-    "photoUrl": "https://picsum.photos/seed/pro3/200",
-    "baseLocation": {"lat": 41.8781, "lng": -87.6298}
-  },
-  {
-    "id": "pro_lucia",
-    "name": "Lucia Gomez",
-    "rating": 4.6,
-    "skills": ["svc_plumbing_inspect", "svc_electrical_fix", "svc_hvac_tuneup"],
-    "photoUrl": "https://picsum.photos/seed/pro4/200",
-    "baseLocation": {"lat": 29.7604, "lng": -95.3698}
-  },
-  {
-    "id": "pro_steven",
-    "name": "Steven Blake",
-    "rating": 4.5,
-    "skills": ["svc_hvac_tuneup", "svc_pest_control"],
-    "photoUrl": "https://picsum.photos/seed/pro5/200",
-    "baseLocation": {"lat": 33.4484, "lng": -112.0740}
-  },
-  {
-    "id": "pro_ayesha",
-    "name": "Ayesha Patel",
+    "id": "pro_leila",
+    "name": "Leila Amrani",
     "rating": 5.0,
-    "skills": ["svc_garden_refresh", "svc_pet_care"],
-    "photoUrl": "https://picsum.photos/seed/pro6/200",
-    "baseLocation": {"lat": 47.6062, "lng": -122.3321}
+    "skills": [
+      "svc_est_soin_express",
+      "svc_est_soin_profond",
+      "svc_est_soin_eclat",
+      "svc_est_soin_antiage",
+      "svc_est_soin_hydrafacial",
+      "svc_est_massage_relax",
+      "svc_est_massage_amincissant",
+      "svc_est_massage_lifting",
+      "svc_est_massage_drainant",
+      "svc_beauty_services_pro_facial_protocols",
+      "svc_beauty_services_pro_spa_strategy"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro4/200",
+    "baseLocation": {
+      "lat": 35.7595,
+      "lng": -5.834
+    }
   },
   {
-    "id": "pro_daniel",
-    "name": "Daniel Brooks",
-    "rating": 4.4,
-    "skills": ["svc_moving_help", "svc_clean_standard"],
-    "photoUrl": "https://picsum.photos/seed/pro7/200",
-    "baseLocation": {"lat": 39.7392, "lng": -104.9903}
-  },
-  {
-    "id": "pro_fiona",
-    "name": "Fiona O'Connor",
-    "rating": 4.8,
-    "skills": ["svc_pest_control", "svc_plumbing_inspect"],
-    "photoUrl": "https://picsum.photos/seed/pro8/200",
-    "baseLocation": {"lat": 32.7767, "lng": -96.7970}
-  },
-  {
-    "id": "pro_samir",
-    "name": "Samir El-Sayed",
-    "rating": 4.9,
-    "skills": ["svc_electrical_fix", "svc_hvac_tuneup"],
-    "photoUrl": "https://picsum.photos/seed/pro9/200",
-    "baseLocation": {"lat": 37.7749, "lng": -122.4194}
-  },
-  {
-    "id": "pro_hannah",
-    "name": "Hannah Wright",
+    "id": "pro_amel",
+    "name": "Amel Idrissi",
     "rating": 4.6,
-    "skills": ["svc_pet_care", "svc_clean_standard"],
-    "photoUrl": "https://picsum.photos/seed/pro10/200",
-    "baseLocation": {"lat": 38.9072, "lng": -77.0369}
+    "skills": [
+      "svc_est_epilation_orteils",
+      "svc_est_pedicure",
+      "svc_est_pedicure_spa",
+      "svc_est_pedicure_medicale",
+      "svc_est_manicure_classic",
+      "svc_est_vernis_normal"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro9/200",
+    "baseLocation": {
+      "lat": 32.286,
+      "lng": -9.2372
+    }
+  },
+  {
+    "id": "pro_youssef",
+    "name": "Youssef Benali",
+    "rating": 4.6,
+    "skills": [
+      "svc_coiff_brushing_court",
+      "svc_coiff_brushing_long",
+      "svc_coiff_pointes",
+      "svc_coiff_transformation",
+      "svc_coiff_wavy",
+      "svc_coiff_chignon_simple",
+      "svc_coiff_babyliss",
+      "svc_coiff_coiffure_soiree",
+      "svc_coiff_mariage",
+      "svc_hair_services_pro_cutting_lab"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro5/200",
+    "baseLocation": {
+      "lat": 33.9716,
+      "lng": -6.8498
+    }
+  },
+  {
+    "id": "pro_imane",
+    "name": "Imane Haddad",
+    "rating": 4.8,
+    "skills": [
+      "svc_coiff_bain_keratine",
+      "svc_coiff_lissage_keratine",
+      "svc_coiff_lissage_racine",
+      "svc_coiff_botox",
+      "svc_coiff_lissage_proteine",
+      "svc_coiff_soin_cheveux",
+      "svc_hair_services_pro_business_bootcamp"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro6/200",
+    "baseLocation": {
+      "lat": 32.2942,
+      "lng": -9.2372
+    }
+  },
+  {
+    "id": "pro_karim",
+    "name": "Karim Essafi",
+    "rating": 4.7,
+    "skills": [
+      "svc_coiff_rincage",
+      "svc_coiff_coloration_racines",
+      "svc_coiff_couleur_sans_ammo",
+      "svc_coiff_meches_courts",
+      "svc_coiff_meches_longs",
+      "svc_coiff_balayage",
+      "svc_coiff_patine",
+      "svc_coiff_balayage_sans_patine",
+      "svc_coiff_ombre",
+      "svc_coiff_decoloration"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro7/200",
+    "baseLocation": {
+      "lat": 30.4278,
+      "lng": -9.5981
+    }
+  },
+  {
+    "id": "pro_nadia",
+    "name": "Nadia Ziani",
+    "rating": 4.9,
+    "skills": [
+      "svc_est_gel_biab",
+      "svc_est_gel_permanent",
+      "svc_est_gel_ongles",
+      "svc_est_remplissage_gel",
+      "svc_est_polygel",
+      "svc_est_acrylique",
+      "svc_est_vernis_depose"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro8/200",
+    "baseLocation": {
+      "lat": 35.168,
+      "lng": -5.2636
+    }
+  },
+  {
+    "id": "pro_lina",
+    "name": "Lina Rahmani",
+    "rating": 4.8,
+    "skills": [
+      "svc_coiff_extensions_bande",
+      "svc_coiff_extensions_tissage",
+      "svc_coiff_pose_extensions",
+      "svc_coiff_depose_extensions",
+      "svc_coiff_chignon_artistique"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro10/200",
+    "baseLocation": {
+      "lat": 34.6867,
+      "lng": -1.9126
+    }
+  },
+  {
+    "id": "pro_jade",
+    "name": "Jade Mansouri",
+    "rating": 4.95,
+    "skills": [
+      "svc_est_makeup_flash",
+      "svc_est_makeup_day",
+      "svc_est_makeup_evening",
+      "svc_est_makeup_wedding",
+      "svc_est_cils_naturel",
+      "svc_est_cils_russe",
+      "svc_pro_business_brand_photoshoot",
+      "svc_pro_education_masterclass_lashes"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro11/200",
+    "baseLocation": {
+      "lat": 33.5731,
+      "lng": -7.5898
+    }
+  },
+  {
+    "id": "pro_ryan",
+    "name": "Ryan Belkadi",
+    "rating": 4.7,
+    "skills": [
+      "svc_coiff_brushing_court",
+      "svc_coiff_wavy",
+      "svc_coiff_transformation",
+      "svc_coiff_lissage_keratine",
+      "svc_coiff_soin_cheveux"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro12/200",
+    "baseLocation": {
+      "lat": 35.1714,
+      "lng": -6.1474
+    }
+  },
+  {
+    "id": "pro_samira",
+    "name": "Samira Khattabi",
+    "rating": 4.85,
+    "skills": [
+      "svc_est_massage_relax",
+      "svc_est_massage_amincissant",
+      "svc_est_massage_lifting",
+      "svc_est_massage_drainant",
+      "svc_est_soin_antiage",
+      "svc_est_soin_hydrafacial",
+      "svc_beauty_services_pro_spa_strategy",
+      "svc_pro_business_finance_clinic",
+      "svc_pro_education_safety_certification"
+    ],
+    "photoUrl": "https://picsum.photos/seed/beauty_pro13/200",
+    "baseLocation": {
+      "lat": 31.5106,
+      "lng": -9.7743
+    }
+  },
+  {
+    "id": "pro_benji_collective",
+    "name": "Benji Collective",
+    "rating": 5.0,
+    "skills": [
+      "svc_beauty_artificial_nails_acrylique",
+      "svc_beauty_artificial_nails_faux_ongles",
+      "svc_beauty_artificial_nails_gel_technique_biab",
+      "svc_beauty_artificial_nails_gel_vernis_permanent",
+      "svc_beauty_artificial_nails_ongles_en_gel",
+      "svc_beauty_artificial_nails_polygel",
+      "svc_beauty_artificial_nails_remplissage_gel",
+      "svc_beauty_body_treatments_massage_amincissant",
+      "svc_beauty_body_treatments_massage_drainant",
+      "svc_beauty_body_treatments_massage_lifting_colombien",
+      "svc_beauty_body_treatments_massage_relaxanttonifiant",
+      "svc_beauty_facial_treatments_soin_aclat",
+      "svc_beauty_facial_treatments_soin_anti_age",
+      "svc_beauty_facial_treatments_soin_express",
+      "svc_beauty_facial_treatments_soin_hydrafacial",
+      "svc_beauty_facial_treatments_soin_profond",
+      "svc_beauty_foot_care_padicure_madicale",
+      "svc_beauty_foot_care_padicure_sans_pose_vernis",
+      "svc_beauty_foot_care_padicure_spa",
+      "svc_beauty_lash_extensions_cils_permanents_glamour",
+      "svc_beauty_lash_extensions_cils_permanents_naturel",
+      "svc_beauty_lash_extensions_cils_permanents_russe",
+      "svc_beauty_lash_extensions_dapose_cils_permanents",
+      "svc_beauty_lash_extensions_faux_cils_pose_bouquet",
+      "svc_beauty_makeup_maquillage_flash",
+      "svc_beauty_makeup_maquillage_jour",
+      "svc_beauty_makeup_maquillage_mariage",
+      "svc_beauty_makeup_maquillage_soirae",
+      "svc_beauty_manicure_manucure_sans_pose_vernis",
+      "svc_beauty_manicure_manucure_spa",
+      "svc_beauty_manicure_pro_art_masterclass",
+      "svc_beauty_manicure_pro_salon_coaching",
+      "svc_beauty_nail_polish_dapose_vernis_permanent",
+      "svc_beauty_nail_polish_pose_vernis_normal",
+      "svc_beauty_nail_polish_pose_vernis_permanent",
+      "svc_beauty_services_pro_facial_protocols",
+      "svc_beauty_services_pro_spa_strategy",
+      "svc_beauty_tinting_teinture_cils",
+      "svc_beauty_tinting_teinture_sourcils",
+      "svc_beauty_waxing_aisselles",
+      "svc_beauty_waxing_bords_de_maillot",
+      "svc_beauty_waxing_bras_complets",
+      "svc_beauty_waxing_demi_bras",
+      "svc_beauty_waxing_demi_jambes",
+      "svc_beauty_waxing_dos",
+      "svc_beauty_waxing_duvet",
+      "svc_beauty_waxing_fessier",
+      "svc_beauty_waxing_jambes_compla_tes",
+      "svc_beauty_waxing_maillot_simple",
+      "svc_beauty_waxing_narines",
+      "svc_beauty_waxing_orteils",
+      "svc_beauty_waxing_pointe_du_menton",
+      "svc_beauty_waxing_pro_mastery_workshop",
+      "svc_beauty_waxing_pro_studio_setup",
+      "svc_beauty_waxing_ventre",
+      "svc_beauty_waxing_visage_complet",
+      "svc_hair_color_services_balayage",
+      "svc_hair_color_services_balayage_sans_patine",
+      "svc_hair_color_services_coloration_racines",
+      "svc_hair_color_services_couleur_sans_ammoniaque",
+      "svc_hair_color_services_dacoloration_extraame",
+      "svc_hair_color_services_effet_ombra",
+      "svc_hair_color_services_ma_ches_cheveux_courts",
+      "svc_hair_color_services_ma_ches_cheveux_longs",
+      "svc_hair_color_services_patine_colorante_post_ma_ches",
+      "svc_hair_color_services_rinaage_patine_laga_re",
+      "svc_hair_event_styling_chignon_simple",
+      "svc_hair_event_styling_chignon_spacial_artistique",
+      "svc_hair_event_styling_coiffure_mariage",
+      "svc_hair_event_styling_coiffure_soirae",
+      "svc_hair_event_styling_pack_mariage_complet",
+      "svc_hair_hair_care_bain_de_karatine",
+      "svc_hair_hair_care_botox_capillaire",
+      "svc_hair_hair_care_karatine_lissage_complet",
+      "svc_hair_hair_care_lissage_protaine",
+      "svc_hair_hair_care_lissage_racine_entretien",
+      "svc_hair_hair_care_soin_cheveux_secscolorasabamas",
+      "svc_hair_hair_extensions_dapose_extensions",
+      "svc_hair_hair_extensions_extensions_bande_adhasive",
+      "svc_hair_hair_extensions_extensions_tissage_avec_ou_sans_che",
+      "svc_hair_hair_extensions_pose_extensions",
+      "svc_hair_hair_styling_boucla_wavy",
+      "svc_hair_hair_styling_brushing_cheveux_courts",
+      "svc_hair_hair_styling_brushing_cheveux_longs",
+      "svc_hair_hair_styling_chignon_simple",
+      "svc_hair_hair_styling_chignon_spacial_artistique",
+      "svc_hair_hair_styling_coiffure_babyliss",
+      "svc_hair_hair_styling_coupe_transformation",
+      "svc_hair_hair_styling_pointes_rafraachissement",
+      "svc_hair_services_pro_business_bootcamp",
+      "svc_hair_services_pro_cutting_lab",
+      "svc_pro_business_brand_photoshoot",
+      "svc_pro_business_finance_clinic",
+      "svc_pro_education_masterclass_lashes",
+      "svc_pro_education_safety_certification"
+    ],
+    "photoUrl": "https://picsum.photos/seed/benji_collective/200",
+    "baseLocation": {
+      "lat": 33.5899,
+      "lng": -7.6039
+    }
   }
 ]

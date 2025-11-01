@@ -1,0 +1,98 @@
+category,subcategory,service,price_avg_min_mad,price_avg_max_mad,price_recommended_mad,unit
+Esthétique,Épilation,Duvet,30,50,20,service
+Esthétique,Épilation,Narines,20,30,15,service
+Esthétique,Épilation,Pointe du menton,30,50,20,service
+Esthétique,Épilation,Visage complet,80,150,90,service
+Esthétique,Épilation,Aisselles,50,80,30,service
+Esthétique,Épilation,Jambes complètes,100,150,100,service
+Esthétique,Épilation,Demi-jambes,70,100,60,service
+Esthétique,Épilation,Bras complets,70,100,70,service
+Esthétique,Épilation,Demi bras,50,50,50,service
+Esthétique,Épilation,Maillot simple,80,100,90,service
+Esthétique,Épilation,Bords de maillot,50,80,50,service
+Esthétique,Épilation,Ventre,80,100,50,service
+Esthétique,Épilation,Dos,100,150,70,service
+Esthétique,Épilation,Fessier,100,150,50,service
+Esthétique,Épilation,Orteils,20,30,20,service
+
+Esthétique,Manucure,Manucure sans pose vernis,100,150,70,service
+Esthétique,Manucure,Manucure SPA,,150,150,service
+
+Esthétique,Vernis,Pose vernis normal,50,70,40,service
+Esthétique,Vernis,Pose vernis permanent,150,200,100,service
+Esthétique,Vernis,Dépose vernis permanent,100,150,50,service
+
+Esthétique,Faux ongles,Faux ongles,150,250,150,service
+Esthétique,Faux ongles,Ongles en gel,600,650,300,unité
+Esthétique,Faux ongles,Gel vernis permanent,230,250,350,service
+Esthétique,Faux ongles,Gel technique BIAB,450,450,300,service
+Esthétique,Faux ongles,Remplissage gel,350,400,300,service
+Esthétique,Faux ongles,Polygel,450,600,300,service
+Esthétique,Faux ongles,Acrylique,600,700,600,service
+
+Esthétique,Beauté des pieds,Pédicure sans pose vernis,150,200,100,service
+Esthétique,Beauté des pieds,Pédicure SPA,230,280,150,service
+Esthétique,Beauté des pieds,Pédicure médicale,300,400,200,service
+
+Esthétique,Maquillage,Maquillage flash,150,200,150,service
+Esthétique,Maquillage,Maquillage jour,200,300,250,service
+Esthétique,Maquillage,Maquillage soirée,300,500,500,service
+Esthétique,Maquillage,Maquillage mariage,500,1000,,service
+
+Esthétique,Extensions de cils,Cils permanents (naturel),500,500,1000,service
+Esthétique,Extensions de cils,Cils permanents (glamour),700,700,,service
+Esthétique,Extensions de cils,Cils permanents (russe),900,900,,service
+Esthétique,Extensions de cils,Faux cils (pose bouquet),200,200,150,service
+Esthétique,Extensions de cils,Dépose cils permanents,100,150,200,service
+
+Esthétique,Teinture des cils et sourcils,Teinture sourcils,100,100,100,service
+Esthétique,Teinture des cils et sourcils,Teinture cils,100,100,,service
+
+Esthétique,Soins du visage,Soin express,300,400,250,service
+Esthétique,Soins du visage,Soin profond,600,700,400,service
+Esthétique,Soins du visage,Soin éclat,500,600,500,service
+Esthétique,Soins du visage,Soin anti-âge,700,900,700,service
+Esthétique,Soins du visage,Soin hydrafacial,600,800,700,service
+
+Esthétique,Soins du corps,Massage relaxanttonifiant,300,500,200,service
+Esthétique,Soins du corps,Massage amincissant,400,600,300,service
+Esthétique,Soins du corps,Massage lifting colombien,500,700,200,service
+Esthétique,Soins du corps,Massage drainant,400,600,,service
+
+Coiffure,Actes Coiffure,Brushing (cheveux courts),30,70,50,service
+Coiffure,Actes Coiffure,Brushing (cheveux longs),50,150,100,service
+Coiffure,Actes Coiffure,Pointes (rafraîchissement),80,120,60,service
+Coiffure,Actes Coiffure,Coupe transformation,120,250,120,service
+Coiffure,Actes Coiffure,Bouclé (wavy, boucleur),80,250,100,service
+Coiffure,Actes Coiffure,Chignon simple,200,300,200,service
+Coiffure,Actes Coiffure,Chignon spécial  artistique,600,1000,600,service
+Coiffure,Actes Coiffure,Coiffure Babyliss,100,300,150,service
+
+Coiffure,Soins des cheveux,Bain de kératine,250,400,600,service
+Coiffure,Soins des cheveux,Kératine lissage complet,800,1500,800,service
+Coiffure,Soins des cheveux,Lissage racine (entretien),500,800,500,service
+Coiffure,Soins des cheveux,Botox capillaire,500,900,1000,service
+Coiffure,Soins des cheveux,Lissage Protéine,700,1300,1000,service
+Coiffure,Soins des cheveux,Soin cheveux secscolorésabîmés,250,500,150,service
+
+Coiffure,Coloration,Rinçage  patine légère,200,300,200,service
+Coiffure,Coloration,Coloration racines,250,300,150,service
+Coiffure,Coloration,Couleur sans ammoniaque,300,450,300,service
+Coiffure,Coloration,Mèches (cheveux courts),400,500,300,service
+Coiffure,Coloration,Mèches (cheveux longs),500,600,450,service
+Coiffure,Coloration,Balayage,500,800,300,service
+Coiffure,Coloration,Patine colorante (post-mèches),200,300,,service
+Coiffure,Coloration,Balayage sans patine,500,700,500,service
+Coiffure,Coloration,Effet ombré,800,1000,800,service
+Coiffure,Coloration,Décoloration extrême,600,1200,500,service
+
+Coiffure,Extensions,Extensions bande adhésive,1200,2000,70,unité
+Coiffure,Extensions,Extensions tissage (avec ou sans cheveux),800,1500,1500,service
+Coiffure,Extensions,Pose extensions,400,600,300,service
+Coiffure,Extensions,Dépose extensions,300,500,250,service
+
+Coiffure,Coiffures de cérémonie,Chignon simple,200,300,,service
+Coiffure,Coiffures de cérémonie,Chignon spécial  artistique,600,1000,,service
+Coiffure,Coiffures de cérémonie,Coiffure soirée,250,500,,service
+Coiffure,Coiffures de cérémonie,Coiffure mariage,1500,3500,,service
+Coiffure,Coiffures de cérémonie,Pack mariage complet,3500,6000,4500,service

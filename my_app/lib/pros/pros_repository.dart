@@ -4,7 +4,13 @@ import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 
 import 'models/pro.dart';
 
-class ProsRepository {
+abstract class ProsDataSource {
+  Future<List<Pro>> loadPros();
+  Future<List<Pro>> loadProsForService(String serviceId);
+  Future<Pro?> getProById(String proId);
+}
+
+class ProsRepository implements ProsDataSource {
   ProsRepository({AssetBundle? bundle}) : _bundle = bundle ?? rootBundle;
 
   static const String _prosAssetPath = 'assets/pros.json';
@@ -13,6 +19,7 @@ class ProsRepository {
 
   List<Pro>? _cachedPros;
 
+  @override
   Future<List<Pro>> loadPros() async {
     if (_cachedPros != null) {
       return _cachedPros!;
@@ -26,6 +33,7 @@ class ProsRepository {
     return _cachedPros!;
   }
 
+  @override
   Future<List<Pro>> loadProsForService(String serviceId) async {
     final pros = await loadPros();
     if (serviceId.isEmpty) {
@@ -34,6 +42,7 @@ class ProsRepository {
     return pros.where((pro) => pro.supportsService(serviceId)).toList();
   }
 
+  @override
   Future<Pro?> getProById(String proId) async {
     if (proId.isEmpty) {
       return null;

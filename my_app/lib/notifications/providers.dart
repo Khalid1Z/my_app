@@ -3,10 +3,12 @@ import 'package:my_app/bookings/models/booking.dart';
 
 import 'models/notification_entry.dart';
 
-final notificationsProvider = StateNotifierProvider<NotificationsNotifier,
-    List<NotificationEntry>>((ref) {
-  return NotificationsNotifier();
-});
+final notificationsProvider =
+    StateNotifierProvider<NotificationsNotifier, List<NotificationEntry>>((
+      ref,
+    ) {
+      return NotificationsNotifier();
+    });
 
 class NotificationsNotifier extends StateNotifier<List<NotificationEntry>> {
   NotificationsNotifier() : super(const []);
@@ -71,10 +73,21 @@ class NotificationsNotifier extends StateNotifier<List<NotificationEntry>> {
     );
   }
 
+  void notifyLoyaltyUpdated({required int points, String source = 'booking'}) {
+    addNotification(
+      NotificationEntry(
+        id: _generateId(),
+        title: 'Loyalty updated',
+        body: 'You now have $points pts thanks to your latest $source.',
+        timestamp: DateTime.now(),
+        type: NotificationType.loyalty,
+        isRead: false,
+      ),
+    );
+  }
+
   void markAllRead() {
-    state = [
-      for (final entry in state) entry.copyWith(isRead: true),
-    ];
+    state = [for (final entry in state) entry.copyWith(isRead: true)];
   }
 
   void markRead(String id) {

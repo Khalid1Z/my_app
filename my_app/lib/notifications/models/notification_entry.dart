@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-enum NotificationType { booking, wallet, review }
+enum NotificationType { booking, wallet, review, loyalty }
 
 @immutable
 class NotificationEntry {

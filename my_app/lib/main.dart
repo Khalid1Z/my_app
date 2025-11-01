@@ -6,11 +6,14 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:my_app/auth/auth_controller.dart';
+import 'package:my_app/auth/auth_page.dart';
 import 'package:my_app/bookings/models/booking.dart';
 import 'package:my_app/bookings/providers.dart';
 import 'package:my_app/notifications/models/notification_entry.dart';
 import 'package:my_app/notifications/providers.dart';
 import 'package:my_app/profile/models/user_profile.dart';
+import 'package:my_app/home/booking_launcher.dart';
 import 'package:my_app/profile/onboarding/providers.dart';
 import 'package:my_app/profile/providers.dart';
 import 'package:my_app/pros/models/pro.dart';
@@ -129,6 +132,12 @@ class AppRouter {
             },
           ),
           GoRoute(
+            path: '/pros/directory',
+            name: ProDirectoryPage.routeName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const ProDirectoryPage(),
+          ),
+          GoRoute(
             path: '/services/slot-picker/:serviceId/:proId',
             name: SlotPickerPage.routeName,
             parentNavigatorKey: _rootNavigatorKey,
@@ -148,6 +157,7 @@ class AppRouter {
                 serviceId: params['serviceId'] ?? '',
                 proId: params['proId'] ?? '',
                 slotIso: params['slot'],
+                isExpress: (params['express'] ?? '').toLowerCase() == 'true',
               );
             },
           ),
@@ -206,7 +216,7 @@ class AppRouter {
   final GoRouter router;
 }
 
-class AppNavigationShell extends StatelessWidget {
+class AppNavigationShell extends ConsumerWidget {
   const AppNavigationShell({super.key, required this.navigationShell});
   final StatefulNavigationShell navigationShell;
   void _onDestinationSelected(int index) {
@@ -217,7 +227,11 @@ class AppNavigationShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authControllerProvider);
+    if (!authState.isAuthenticated) {
+      return const AuthPage();
+    }
     return Scaffold(
       body: SafeArea(child: navigationShell),
       bottomNavigationBar: NavigationBar(
@@ -258,6 +272,15 @@ class AppNavigationShell extends StatelessWidget {
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
   static const String routeName = 'home';
+
+  Future<void> _showBookingLauncher(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => BookingLauncherSheet(rootContext: context),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookings = ref.watch(bookingsProvider);
@@ -269,21 +292,19 @@ class HomePage extends ConsumerWidget {
       if (booking.status != BookingStatus.completed) {
         continue;
       }
-      final hasReview = reviews.any(
-        (review) => review.bookingId == booking.id,
-      );
+      final hasReview = reviews.any((review) => review.bookingId == booking.id);
       if (!hasReview) {
         pendingReviewBooking = booking;
         break;
       }
     }
 
-    final openTickets = tickets
-        .where((ticket) => ticket.status == TicketStatus.open)
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    final SupportTicket? activeTicket =
-        openTickets.isNotEmpty ? openTickets.first : null;
+    final openTickets =
+        tickets.where((ticket) => ticket.status == TicketStatus.open).toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final SupportTicket? activeTicket = openTickets.isNotEmpty
+        ? openTickets.first
+        : null;
 
     Service? pendingService;
     Pro? pendingPro;
@@ -291,8 +312,8 @@ class HomePage extends ConsumerWidget {
       pendingService = pendingReviewBooking.serviceId.isEmpty
           ? null
           : ref
-              .watch(serviceByIdProvider(pendingReviewBooking.serviceId))
-              .valueOrNull;
+                .watch(serviceByIdProvider(pendingReviewBooking.serviceId))
+                .valueOrNull;
       pendingPro = pendingReviewBooking.proId.isEmpty
           ? null
           : ref.watch(proByIdProvider(pendingReviewBooking.proId)).valueOrNull;
@@ -328,8 +349,7 @@ class HomePage extends ConsumerWidget {
     if (pendingReviewBooking != null) {
       final bookingForReview = pendingReviewBooking;
       final localizations = MaterialLocalizations.of(context);
-      final slotDate =
-          localizations.formatMediumDate(bookingForReview.slot);
+      final slotDate = localizations.formatMediumDate(bookingForReview.slot);
       final slotTime = localizations.formatTimeOfDay(
         TimeOfDay.fromDateTime(bookingForReview.slot),
         alwaysUse24HourFormat: true,
@@ -359,9 +379,8 @@ class HomePage extends ConsumerWidget {
                   showModalBottomSheet<void>(
                     context: context,
                     isScrollControlled: true,
-                    builder: (sheetContext) => ReviewSheet(
-                      booking: bookingForReview,
-                    ),
+                    builder: (sheetContext) =>
+                        ReviewSheet(booking: bookingForReview),
                   );
                 },
               ),
@@ -373,32 +392,43 @@ class HomePage extends ConsumerWidget {
 
     children.addAll([
       AppCard(
-        title: 'Quick Booking',
-        subtitle: 'Showcase primary and ghost button styles.',
+        title: 'Conversion workflow',
+        subtitle: 'Service - Professional - Slot - Payment',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Use the primary button for the main action and the ghost variant for secondary choices.',
+              'Launch the guided flow to capture identity, availability, and payment in one go.',
               style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: AppSpacing.medium),
+            Wrap(
+              spacing: AppSpacing.small,
+              runSpacing: AppSpacing.small,
+              children: const [
+                PillTag(label: 'Identity check'),
+                PillTag(label: 'Pro matching'),
+                PillTag(label: 'Slot confirmation'),
+                PillTag(label: 'Payment'),
+              ],
             ),
             const SizedBox(height: AppSpacing.medium),
             Row(
               children: [
                 Expanded(
                   child: AppButton(
-                    label: 'Book now',
+                    label: 'Start booking',
                     expand: true,
-                    onPressed: () {},
+                    onPressed: () => _showBookingLauncher(context),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.medium),
                 Expanded(
                   child: AppButton(
-                    label: 'See options',
+                    label: 'Browse services',
                     variant: AppButtonVariant.ghost,
                     expand: true,
-                    onPressed: () {},
+                    onPressed: () => context.goNamed(ServicesPage.routeName),
                   ),
                 ),
               ],
@@ -407,59 +437,44 @@ class HomePage extends ConsumerWidget {
         ),
       ),
       AppCard(
-        title: 'Featured Professional',
-        subtitle: 'Ready to accept bookings today.',
-        trailing: const PillTag(label: 'New'),
-        child: Row(
+        title: 'Pipeline health',
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const AvatarWithBadge(initials: 'RM', isOnline: true),
-            const SizedBox(width: AppSpacing.medium),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Rene Marshall',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: AppSpacing.small / 2),
-                  const RatingStars(rating: 4.8),
-                  const SizedBox(height: AppSpacing.small),
-                  Text(
-                    'Specialist in all-inclusive home cleaning and organisation.',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
+            const Text(
+              'Monitor status across the acquisition and conversion steps.',
+            ),
+            const SizedBox(height: AppSpacing.small),
+            const PriceRow(label: 'New leads this week', amount: '48'),
+            const SizedBox(height: AppSpacing.small),
+            const PriceRow(label: 'Qualified prospects', amount: '32'),
+            const SizedBox(height: AppSpacing.small),
+            PriceRow(
+              label: 'Conversion rate',
+              amount: '66%',
+              trailing: Icon(
+                Icons.trending_up,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ],
         ),
       ),
       AppCard(
-        title: 'Upcoming Payment',
-        subtitle: 'Here is how price rows align totals to the right.',
+        title: 'Loyalty and ambassadors',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const PriceRow(
-              label: 'Premium cleaning session',
-              amount: '\$85.00',
+            Text(
+              'Reward repeat clients and manage referrals directly from the wallet workspace.',
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: AppSpacing.small),
-            const PriceRow(label: 'Service fee', amount: '\$5.00'),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.small),
-              child: Divider(),
-            ),
-            PriceRow(
-              label: 'Total due',
-              amount: '\$90.00',
-              trailing: Icon(
-                Icons.lock_clock,
-                color: Theme.of(context).colorScheme.primary,
-                size: 18,
-              ),
+            AppButton(
+              label: 'Open loyalty wallet',
+              variant: AppButtonVariant.ghost,
+              expand: true,
+              onPressed: () => context.goNamed(WalletPage.routeName),
             ),
           ],
         ),
@@ -527,9 +542,7 @@ class _ReviewSheetState extends ConsumerState<ReviewSheet> {
     final localizations = MaterialLocalizations.of(context);
     final service = widget.booking.serviceId.isEmpty
         ? null
-        : ref
-            .watch(serviceByIdProvider(widget.booking.serviceId))
-            .valueOrNull;
+        : ref.watch(serviceByIdProvider(widget.booking.serviceId)).valueOrNull;
     final pro = widget.booking.proId.isEmpty
         ? null
         : ref.watch(proByIdProvider(widget.booking.proId)).valueOrNull;
@@ -549,8 +562,7 @@ class _ReviewSheetState extends ConsumerState<ReviewSheet> {
           left: AppSpacing.medium,
           right: AppSpacing.medium,
           top: AppSpacing.medium,
-          bottom: AppSpacing.medium +
-              MediaQuery.of(context).viewInsets.bottom,
+          bottom: AppSpacing.medium + MediaQuery.of(context).viewInsets.bottom,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -566,24 +578,15 @@ class _ReviewSheetState extends ConsumerState<ReviewSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.large),
-            Text(
-              'Leave a review',
-              style: theme.textTheme.headlineSmall,
-            ),
+            Text('Leave a review', style: theme.textTheme.headlineSmall),
             const SizedBox(height: AppSpacing.small),
             Text(
               '$serviceTitle with $proName',
               style: theme.textTheme.bodyMedium,
             ),
-            Text(
-              slotLabel,
-              style: theme.textTheme.bodySmall,
-            ),
+            Text(slotLabel, style: theme.textTheme.bodySmall),
             const SizedBox(height: AppSpacing.large),
-            Text(
-              'Rating',
-              style: theme.textTheme.titleMedium,
-            ),
+            Text('Rating', style: theme.textTheme.titleMedium),
             const SizedBox(height: AppSpacing.small),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -609,32 +612,22 @@ class _ReviewSheetState extends ConsumerState<ReviewSheet> {
               }),
             ),
             Center(
-              child: Text(
-                '$_rating of 5',
-                style: theme.textTheme.bodyMedium,
-              ),
+              child: Text('$_rating of 5', style: theme.textTheme.bodyMedium),
             ),
             const SizedBox(height: AppSpacing.large),
-            Text(
-              'What stood out?',
-              style: theme.textTheme.titleMedium,
-            ),
+            Text('What stood out?', style: theme.textTheme.titleMedium),
             const SizedBox(height: AppSpacing.small),
             TextField(
               controller: _commentController,
               maxLines: 4,
               textInputAction: TextInputAction.done,
               decoration: const InputDecoration(
-                hintText: 'Optional – share more about your experience',
+                hintText: 'Optional - share more about your experience',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: AppSpacing.large),
-            AppButton(
-              label: 'Submit review',
-              expand: true,
-              onPressed: _submit,
-            ),
+            AppButton(label: 'Submit review', expand: true, onPressed: _submit),
           ],
         ),
       ),
@@ -821,6 +814,58 @@ class WalletPage extends ConsumerWidget {
                   style: theme.textTheme.bodySmall,
                 ),
                 const SizedBox(height: AppSpacing.medium),
+                AppCard(
+                  title: 'Loyalty status',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Current balance: ${wallet.loyaltyPoints} pts',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.small),
+                      Text(
+                        'Next reward unlocks at ${wallet.nextRewardThreshold} pts.',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      if (wallet.activeOffers.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.small),
+                        Wrap(
+                          spacing: AppSpacing.small,
+                          runSpacing: AppSpacing.small,
+                          children: wallet.activeOffers
+                              .map((offer) => PillTag(label: offer))
+                              .toList(),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.medium),
+                AppCard(
+                  title: 'Referral programme',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Share code ${wallet.referralCode} to reward ambassadors.',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.small),
+                      PriceRow(
+                        label: 'Active ambassadors',
+                        amount: wallet.referralCount.toString(),
+                      ),
+                      const SizedBox(height: AppSpacing.small),
+                      PriceRow(
+                        label: 'Referral balance',
+                        amount:
+                            '\$${wallet.referralBalance.toStringAsFixed(2)}',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.medium),
                 AppButton(
                   label: 'Top-up +100',
                   expand: true,
@@ -915,6 +960,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
   late final TextEditingController _emailController;
+  late final TextEditingController _addressController;
+  late final TextEditingController _cityController;
+  late final TextEditingController _idController;
+  DateTime? _selectedBirthDate;
   ProviderSubscription<UserProfile>? _profileSubscription;
 
   @override
@@ -924,32 +973,57 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     _nameController = TextEditingController(text: profile.name);
     _phoneController = TextEditingController(text: profile.phone);
     _emailController = TextEditingController(text: profile.email);
-    _profileSubscription = ref.listenManual<UserProfile>(
-      userProfileProvider,
-      (previous, next) {
-        if (!mounted) {
-          return;
-        }
-        if (previous?.name != next.name) {
-          _nameController.value = TextEditingValue(
-            text: next.name,
-            selection: TextSelection.collapsed(offset: next.name.length),
-          );
-        }
-        if (previous?.phone != next.phone) {
-          _phoneController.value = TextEditingValue(
-            text: next.phone,
-            selection: TextSelection.collapsed(offset: next.phone.length),
-          );
-        }
-        if (previous?.email != next.email) {
-          _emailController.value = TextEditingValue(
-            text: next.email,
-            selection: TextSelection.collapsed(offset: next.email.length),
-          );
-        }
-      },
-    );
+    _addressController = TextEditingController(text: profile.addressLine);
+    _cityController = TextEditingController(text: profile.city);
+    _idController = TextEditingController(text: profile.nationalId);
+    _selectedBirthDate = profile.dateOfBirth;
+    _profileSubscription = ref.listenManual<UserProfile>(userProfileProvider, (
+      previous,
+      next,
+    ) {
+      if (!mounted) {
+        return;
+      }
+      if (previous?.name != next.name) {
+        _nameController.value = TextEditingValue(
+          text: next.name,
+          selection: TextSelection.collapsed(offset: next.name.length),
+        );
+      }
+      if (previous?.phone != next.phone) {
+        _phoneController.value = TextEditingValue(
+          text: next.phone,
+          selection: TextSelection.collapsed(offset: next.phone.length),
+        );
+      }
+      if (previous?.email != next.email) {
+        _emailController.value = TextEditingValue(
+          text: next.email,
+          selection: TextSelection.collapsed(offset: next.email.length),
+        );
+      }
+      if (previous?.addressLine != next.addressLine) {
+        _addressController.value = TextEditingValue(
+          text: next.addressLine,
+          selection: TextSelection.collapsed(offset: next.addressLine.length),
+        );
+      }
+      if (previous?.city != next.city) {
+        _cityController.value = TextEditingValue(
+          text: next.city,
+          selection: TextSelection.collapsed(offset: next.city.length),
+        );
+      }
+      if (previous?.nationalId != next.nationalId) {
+        _idController.value = TextEditingValue(
+          text: next.nationalId,
+          selection: TextSelection.collapsed(offset: next.nationalId.length),
+        );
+      }
+      if (previous?.dateOfBirth != next.dateOfBirth) {
+        _selectedBirthDate = next.dateOfBirth;
+      }
+    });
   }
 
   @override
@@ -958,6 +1032,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _addressController.dispose();
+    _cityController.dispose();
+    _idController.dispose();
     super.dispose();
   }
 
@@ -966,14 +1043,34 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       return;
     }
     FocusScope.of(context).unfocus();
-    ref.read(userProfileProvider.notifier).updateContact(
+    ref
+        .read(userProfileProvider.notifier)
+        .updateContact(
           name: _nameController.text.trim(),
           phone: _phoneController.text.trim(),
           email: _emailController.text.trim(),
+          addressLine: _addressController.text.trim(),
+          city: _cityController.text.trim(),
+          nationalId: _idController.text.trim(),
+          dateOfBirth: _selectedBirthDate,
         );
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile updated')),
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Profile updated')));
+  }
+
+  Future<void> _pickBirthDate() async {
+    final now = DateTime.now();
+    final initialDate = _selectedBirthDate ?? DateTime(now.year - 25);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(now.year - 80),
+      lastDate: now,
     );
+    if (picked != null) {
+      setState(() => _selectedBirthDate = picked);
+    }
   }
 
   @override
@@ -1006,6 +1103,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextFormField(
                 controller: _nameController,
@@ -1036,6 +1134,46 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: AppSpacing.small),
+              TextFormField(
+                controller: _addressController,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Street address'),
+                validator: (value) =>
+                    value == null || value.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: AppSpacing.small),
+              TextFormField(
+                controller: _cityController,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'City'),
+                validator: (value) =>
+                    value == null || value.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: AppSpacing.small),
+              TextFormField(
+                controller: _idController,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(
+                  labelText: 'National ID / Passport',
+                ),
+                validator: (value) =>
+                    value == null || value.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: AppSpacing.small),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Date of birth'),
+                subtitle: Text(
+                  _selectedBirthDate != null
+                      ? MaterialLocalizations.of(
+                          context,
+                        ).formatMediumDate(_selectedBirthDate!)
+                      : 'Tap to add birth date',
+                ),
+                trailing: const Icon(Icons.calendar_today_outlined),
+                onTap: _pickBirthDate,
               ),
               const SizedBox(height: AppSpacing.medium),
               AppButton(
@@ -1080,9 +1218,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 spacing: AppSpacing.small,
                 runSpacing: AppSpacing.small,
                 children: profile.kycDocuments
-                    .map(
-                      (path) => PillTag(label: path.split('/').last),
-                    )
+                    .map((path) => PillTag(label: path.split('/').last))
                     .toList(),
               ),
             ],
@@ -1106,8 +1242,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               AppButton(
                 label: 'View onboarding checklist',
                 expand: true,
-                onPressed: () =>
-                    context.pushNamed(ProOnboardingPage.routeName),
+                onPressed: () => context.pushNamed(ProOnboardingPage.routeName),
               ),
               const SizedBox(height: AppSpacing.small),
               AppButton(
@@ -1122,6 +1257,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
       );
     }
+
+    children.add(
+      AppCard(
+        child: AppButton(
+          label: 'Sign out',
+          variant: AppButtonVariant.ghost,
+          expand: true,
+          onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+        ),
+      ),
+    );
 
     return _PageShowcase(
       title: 'Profile',
@@ -1588,49 +1734,234 @@ class CheckoutPage extends ConsumerStatefulWidget {
     required this.serviceId,
     required this.proId,
     required this.slotIso,
+    this.isExpress = false,
   });
   static const String routeName = 'checkout';
   final String serviceId;
   final String proId;
   final String? slotIso;
+  final bool isExpress;
   @override
   ConsumerState<CheckoutPage> createState() => _CheckoutPageState();
 }
 
 class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _streetController = TextEditingController();
-  final _cityController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _streetController;
+  late final TextEditingController _cityController;
+  late final TextEditingController _idController;
+  late final TextEditingController _notesController;
+  final Set<String> _selectedAddOns = <String>{};
+  final Set<String> _selectedRetail = <String>{};
   PaymentMethod _paymentMethod = PaymentMethod.wallet;
+
+  @override
+  void initState() {
+    super.initState();
+    final profile = ref.read(userProfileProvider);
+    _nameController = TextEditingController(text: profile.name);
+    _phoneController = TextEditingController(text: profile.phone);
+    _emailController = TextEditingController(text: profile.email);
+    _streetController = TextEditingController(text: profile.addressLine);
+    _cityController = TextEditingController(text: profile.city);
+    _idController = TextEditingController(text: profile.nationalId);
+    _notesController = TextEditingController();
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _emailController.dispose();
     _streetController.dispose();
     _cityController.dispose();
+    _idController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
-  void _confirmBooking({
+  List<BookingExtra> _addOnSuggestions(Service service, Pro pro) {
+    final title = service.title.toLowerCase();
+    final suggestions = <BookingExtra>[
+      const BookingExtra(
+        id: 'addon_priority_confirmation',
+        label: 'Priority confirmation',
+        price: 12,
+        type: BookingExtraType.addOn,
+        description: 'Reserve the slot while the professional reviews details.',
+      ),
+    ];
+    if (title.contains('wax') || title.contains('epil')) {
+      suggestions.addAll(const [
+        BookingExtra(
+          id: 'addon_soothing_mask',
+          label: 'Soothing mask',
+          price: 18,
+          type: BookingExtraType.addOn,
+          description: 'Calm the skin with an aloe treatment.',
+        ),
+        BookingExtra(
+          id: 'addon_follow_up',
+          label: 'Anti-ingrown follow up',
+          price: 22,
+          type: BookingExtraType.addOn,
+          description: '15 minute ritual to avoid redness after the visit.',
+        ),
+      ]);
+    } else if (title.contains('massage')) {
+      suggestions.addAll([
+        BookingExtra(
+          id: 'addon_aroma',
+          label: 'Aromatherapy oils',
+          price: 25,
+          type: BookingExtraType.addOn,
+          description: 'Premium oils curated by ${pro.name}.',
+        ),
+        const BookingExtra(
+          id: 'addon_extension',
+          label: 'Extra 15 minutes',
+          price: 35,
+          type: BookingExtraType.addOn,
+          description: 'Extend the session and focus on key areas.',
+        ),
+      ]);
+    } else if (title.contains('hair')) {
+      suggestions.addAll(const [
+        BookingExtra(
+          id: 'addon_mask',
+          label: 'Deep conditioning mask',
+          price: 28,
+          type: BookingExtraType.addOn,
+          description: 'Restore shine before styling.',
+        ),
+        BookingExtra(
+          id: 'addon_heat_protect',
+          label: 'Thermal protection ritual',
+          price: 18,
+          type: BookingExtraType.addOn,
+          description: 'Protect fibres before hot tools.',
+        ),
+      ]);
+    }
+    final unique = <String>{};
+    final result = <BookingExtra>[];
+    for (final extra in suggestions) {
+      if (unique.add(extra.id)) {
+        result.add(extra);
+      }
+    }
+    return result;
+  }
+
+  List<BookingExtra> _retailSuggestions(Service service) {
+    final title = service.title.toLowerCase();
+    final suggestions = <BookingExtra>[
+      const BookingExtra(
+        id: 'retail_aftercare_set',
+        label: 'After-care kit',
+        price: 48,
+        type: BookingExtraType.retail,
+        description: 'Travel kit with cleanser, toner, and SPF mini.',
+      ),
+    ];
+    if (title.contains('wax') || title.contains('epil')) {
+      suggestions.addAll(const [
+        BookingExtra(
+          id: 'retail_glove',
+          label: 'Exfoliating glove duo',
+          price: 19,
+          type: BookingExtraType.retail,
+          description: 'Prevent ingrown hair between sessions.',
+        ),
+        BookingExtra(
+          id: 'retail_serum',
+          label: 'Post-wax calming serum',
+          price: 32,
+          type: BookingExtraType.retail,
+          description: 'Keep the skin smooth for longer.',
+        ),
+      ]);
+    } else if (title.contains('hair')) {
+      suggestions.addAll(const [
+        BookingExtra(
+          id: 'retail_keratin',
+          label: 'Keratin home kit',
+          price: 49,
+          type: BookingExtraType.retail,
+          description: 'Maintain salon gloss for four weeks.',
+        ),
+        BookingExtra(
+          id: 'retail_heat_spray',
+          label: 'Heat shield spray',
+          price: 27,
+          type: BookingExtraType.retail,
+          description: 'Protect hair before daily styling.',
+        ),
+      ]);
+    }
+    final unique = <String>{};
+    final result = <BookingExtra>[];
+    for (final extra in suggestions) {
+      if (unique.add(extra.id)) {
+        result.add(extra);
+      }
+    }
+    return result;
+  }
+
+  int _loyaltyPointsFromTotal(double total) {
+    return (total / 10).ceil() * 6;
+  }
+
+  Future<void> _confirmBooking({
     required Service service,
     required Pro pro,
     required DateTime slot,
-  }) {
+    required List<BookingExtra> addOns,
+    required List<BookingExtra> retail,
+  }) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
     final sameDay = DateUtils.isSameDay(slot, DateTime.now());
     final base = service.basePrice;
+    final addOnTotal = addOns.fold<double>(
+      0,
+      (sum, extra) => sum + extra.price,
+    );
+    final retailTotal = retail.fold<double>(
+      0,
+      (sum, extra) => sum + extra.price,
+    );
     final surcharge = sameDay ? base * 0.1 : 0.0;
-    final total = base + surcharge;
+    final subtotal = base + addOnTotal + retailTotal;
+    final total = subtotal + surcharge;
+    final loyaltyPoints = _loyaltyPointsFromTotal(total);
+    final walletNotifier = ref.read(walletProvider.notifier);
     if (_paymentMethod == PaymentMethod.wallet) {
-      ref.read(walletProvider.notifier).charge(
-            total,
-            description: 'Booking ${service.title}',
-          );
+      await walletNotifier.charge(
+        total,
+        description: 'Booking ${service.title}',
+      );
     }
+    walletNotifier.addLoyaltyPoints(loyaltyPoints);
+    ref
+        .read(userProfileProvider.notifier)
+        .updateContact(
+          name: _nameController.text.trim(),
+          phone: _phoneController.text.trim(),
+          email: _emailController.text.trim(),
+          addressLine: _streetController.text.trim(),
+          city: _cityController.text.trim(),
+          nationalId: _idController.text.trim(),
+        );
+    ref
+        .read(userProfileProvider.notifier)
+        .updateIdentityDetails(nationalId: _idController.text.trim());
+
     final booking = Booking(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       serviceId: service.id,
@@ -1645,18 +1976,34 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       surcharge: surcharge,
       total: total,
       status: BookingStatus.confirmed,
+      email: _emailController.text.trim(),
+      nationalId: _idController.text.trim(),
+      addOns: addOns,
+      retailItems: retail,
+      loyaltyPointsEarned: loyaltyPoints,
+      instructions: _notesController.text.trim(),
+      expressBooking: widget.isExpress,
     );
+
     ref.read(bookingsProvider.notifier).addBooking(booking);
-    ref.read(notificationsProvider.notifier).notifyBookingConfirmed(
+    ref
+        .read(notificationsProvider.notifier)
+        .notifyBookingConfirmed(
           booking: booking,
           serviceTitle: service.title,
           proName: pro.name,
         );
     FocusScope.of(context).unfocus();
+    if (!mounted) {
+      return;
+    }
     context.pushNamed(
       BookingDetailsPage.routeName,
       pathParameters: {'bookingId': booking.id},
     );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Booking confirmed')));
   }
 
   @override
@@ -1684,19 +2031,48 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             final theme = Theme.of(context);
             final localizations = MaterialLocalizations.of(context);
             final slotLabel =
-                '${localizations.formatMediumDate(slot)} • ${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(slot), alwaysUse24HourFormat: true)}';
+                '${localizations.formatMediumDate(slot)} - ${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(slot), alwaysUse24HourFormat: true)}';
             final sameDay = DateUtils.isSameDay(slot, DateTime.now());
+            final addOnOptions = _addOnSuggestions(service, pro);
+            final retailOptions = _retailSuggestions(service);
+            final selectedAddOns = addOnOptions
+                .where((extra) => _selectedAddOns.contains(extra.id))
+                .toList();
+            final selectedRetail = retailOptions
+                .where((extra) => _selectedRetail.contains(extra.id))
+                .toList();
+            final addOnTotal = selectedAddOns.fold<double>(
+              0,
+              (sum, extra) => sum + extra.price,
+            );
+            final retailTotal = selectedRetail.fold<double>(
+              0,
+              (sum, extra) => sum + extra.price,
+            );
+            final subtotal = service.basePrice + addOnTotal + retailTotal;
             final surcharge = sameDay ? service.basePrice * 0.1 : 0.0;
-            final total = service.basePrice + surcharge;
+            final total = subtotal + surcharge;
+            final loyaltyPreview = _loyaltyPointsFromTotal(total);
+
             return Scaffold(
-              appBar: AppBar(title: const Text('Checkout')),
-              body: ListView(
-                padding: const EdgeInsets.all(AppSpacing.medium),
-                children: [
-                  AppCard(
-                    title: 'Contact & address',
-                    child: Form(
-                      key: _formKey,
+              appBar: AppBar(
+                title: const Text('Checkout'),
+                actions: widget.isExpress
+                    ? const [
+                        Padding(
+                          padding: EdgeInsets.only(right: AppSpacing.small),
+                          child: PillTag(label: 'Express'),
+                        ),
+                      ]
+                    : null,
+              ),
+              body: Form(
+                key: _formKey,
+                child: ListView(
+                  padding: const EdgeInsets.all(AppSpacing.medium),
+                  children: [
+                    AppCard(
+                      title: 'Contact & address',
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1725,6 +2101,23 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                           ),
                           const SizedBox(height: AppSpacing.small),
                           TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              labelText: 'Email',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (!value.contains('@')) {
+                                return 'Enter a valid email';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.small),
+                          TextFormField(
                             controller: _streetController,
                             textCapitalization: TextCapitalization.words,
                             decoration: const InputDecoration(
@@ -1747,78 +2140,215 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                 ? 'Required'
                                 : null,
                           ),
+                          const SizedBox(height: AppSpacing.small),
+                          TextFormField(
+                            controller: _idController,
+                            textCapitalization: TextCapitalization.characters,
+                            decoration: const InputDecoration(
+                              labelText: 'National ID / Passport',
+                            ),
+                            validator: (value) =>
+                                value == null || value.trim().isEmpty
+                                ? 'Required'
+                                : null,
+                          ),
                         ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.medium),
-                  AppCard(
-                    title: service.title,
-                    subtitle: '${pro.name} · $slotLabel',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Duration: ${service.durationMin} min',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: AppSpacing.small),
-                        PriceRow(
-                          label: 'Base price',
-                          amount: '\$${service.basePrice.toStringAsFixed(2)}',
-                        ),
-                        if (surcharge > 0) ...[
+                    const SizedBox(height: AppSpacing.medium),
+                    AppCard(
+                      title: service.title,
+                      subtitle: '${pro.name} - $slotLabel',
+                      trailing: widget.isExpress
+                          ? const PillTag(label: 'Express')
+                          : null,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Duration: ${service.durationMin} min',
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           const SizedBox(height: AppSpacing.small),
                           PriceRow(
-                            label: 'Same-day surcharge (10%)',
-                            amount: '\$${surcharge.toStringAsFixed(2)}',
+                            label: 'Base price',
+                            amount: '\$${service.basePrice.toStringAsFixed(2)}',
+                          ),
+                          if (addOnTotal > 0) ...[
+                            const SizedBox(height: AppSpacing.small),
+                            PriceRow(
+                              label: 'Selected add-ons',
+                              amount: '\$${addOnTotal.toStringAsFixed(2)}',
+                            ),
+                          ],
+                          if (retailTotal > 0) ...[
+                            const SizedBox(height: AppSpacing.small),
+                            PriceRow(
+                              label: 'Retail products',
+                              amount: '\$${retailTotal.toStringAsFixed(2)}',
+                            ),
+                          ],
+                          const SizedBox(height: AppSpacing.small),
+                          PriceRow(
+                            label: 'Subtotal',
+                            amount: '\$${subtotal.toStringAsFixed(2)}',
+                          ),
+                          if (surcharge > 0) ...[
+                            const SizedBox(height: AppSpacing.small),
+                            PriceRow(
+                              label: 'Same-day surcharge (10%)',
+                              amount: '\$${surcharge.toStringAsFixed(2)}',
+                            ),
+                            const SizedBox(height: AppSpacing.small / 2),
+                            Text(
+                              'Same-day bookings include a mobility buffer for the professional.',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ],
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.small,
+                            ),
+                            child: Divider(),
+                          ),
+                          PriceRow(
+                            label: 'Total due',
+                            amount: '\$${total.toStringAsFixed(2)}',
+                          ),
+                          const SizedBox(height: AppSpacing.small),
+                          Text(
+                            '+$loyaltyPreview pts will be credited after payment.',
+                            style: theme.textTheme.bodyMedium,
                           ),
                         ],
-                        const Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: AppSpacing.small,
-                          ),
-                          child: Divider(),
-                        ),
-                        PriceRow(
-                          label: 'Total due',
-                          amount: '\$${total.toStringAsFixed(2)}',
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.medium),
-                  AppCard(
-                    title: 'Payment method',
-                    child: SegmentedButton<PaymentMethod>(
-                      segments: const [
-                        ButtonSegment(
-                          value: PaymentMethod.wallet,
-                          icon: Icon(Icons.account_balance_wallet_outlined),
-                          label: Text('Wallet'),
+                    if (addOnOptions.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.medium),
+                      AppCard(
+                        title: 'Add-on services',
+                        subtitle:
+                            'Enhance the visit with extras tailored to ${pro.name}.',
+                        child: Column(
+                          children: addOnOptions
+                              .map(
+                                (extra) => CheckboxListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  value: _selectedAddOns.contains(extra.id),
+                                  title: Text(
+                                    '${extra.label} (+\$${extra.price.toStringAsFixed(0)})',
+                                  ),
+                                  subtitle: Text(extra.description),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      if (value ?? false) {
+                                        _selectedAddOns.add(extra.id);
+                                      } else {
+                                        _selectedAddOns.remove(extra.id);
+                                      }
+                                    });
+                                  },
+                                ),
+                              )
+                              .toList(),
                         ),
-                        ButtonSegment(
-                          value: PaymentMethod.card,
-                          icon: Icon(Icons.credit_card),
-                          label: Text('Card'),
+                      ),
+                    ],
+                    if (retailOptions.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.medium),
+                      AppCard(
+                        title: 'Products to deliver',
+                        subtitle:
+                            'The professional brings these items to the appointment.',
+                        child: Column(
+                          children: retailOptions
+                              .map(
+                                (extra) => CheckboxListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  value: _selectedRetail.contains(extra.id),
+                                  title: Text(
+                                    '${extra.label} (+\$${extra.price.toStringAsFixed(0)})',
+                                  ),
+                                  subtitle: Text(extra.description),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      if (value ?? false) {
+                                        _selectedRetail.add(extra.id);
+                                      } else {
+                                        _selectedRetail.remove(extra.id);
+                                      }
+                                    });
+                                  },
+                                ),
+                              )
+                              .toList(),
                         ),
-                      ],
-                      selected: {_paymentMethod},
-                      onSelectionChanged: (selection) {
-                        if (selection.isNotEmpty) {
-                          setState(() => _paymentMethod = selection.first);
-                        }
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.medium),
+                    AppCard(
+                      title: 'Payment method',
+                      child: SegmentedButton<PaymentMethod>(
+                        segments: const [
+                          ButtonSegment(
+                            value: PaymentMethod.wallet,
+                            icon: Icon(Icons.account_balance_wallet_outlined),
+                            label: Text('Wallet'),
+                          ),
+                          ButtonSegment(
+                            value: PaymentMethod.card,
+                            icon: Icon(Icons.credit_card),
+                            label: Text('Card'),
+                          ),
+                        ],
+                        selected: {_paymentMethod},
+                        onSelectionChanged: (selection) {
+                          if (selection.isNotEmpty) {
+                            setState(() => _paymentMethod = selection.first);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.medium),
+                    AppCard(
+                      title: 'Visit notes',
+                      child: TextField(
+                        controller: _notesController,
+                        maxLines: 3,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: const InputDecoration(
+                          hintText:
+                              'Door code, parking, allergies, how to greet the client?',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.large),
+                    AppButton(
+                      label: 'Confirm booking',
+                      expand: true,
+                      onPressed: () {
+                        final addOns = addOnOptions
+                            .where(
+                              (extra) => _selectedAddOns.contains(extra.id),
+                            )
+                            .toList();
+                        final retail = retailOptions
+                            .where(
+                              (extra) => _selectedRetail.contains(extra.id),
+                            )
+                            .toList();
+                        _confirmBooking(
+                          service: service,
+                          pro: pro,
+                          slot: slot,
+                          addOns: addOns,
+                          retail: retail,
+                        );
                       },
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.large),
-                  AppButton(
-                    label: 'Confirm booking',
-                    expand: true,
-                    onPressed: () =>
-                        _confirmBooking(service: service, pro: pro, slot: slot),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },
@@ -1905,9 +2435,9 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
         return;
       }
       if (receiptPath.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receipt saved.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Receipt saved.')));
         return;
       }
       context.pushNamed(
@@ -1940,8 +2470,7 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
     String _twoDigits(int value) => value.toString().padLeft(2, '0');
     final dateLabel =
         '${slot.year}-${_twoDigits(slot.month)}-${_twoDigits(slot.day)}';
-    final timeLabel =
-        '${_twoDigits(slot.hour)}:${_twoDigits(slot.minute)}';
+    final timeLabel = '${_twoDigits(slot.hour)}:${_twoDigits(slot.minute)}';
 
     doc.addPage(
       pw.Page(
@@ -2046,7 +2575,7 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
               TimeOfDay.fromDateTime(booking.slot),
               alwaysUse24HourFormat: true,
             );
-            final slotLabel = '$slotDate • $slotTime';
+            final slotLabel = '$slotDate - $slotTime';
             final serviceTitle =
                 service?.title ?? 'Service ${booking.serviceId}';
             final proName = pro?.name ?? 'Professional ${booking.proId}';
@@ -2063,7 +2592,9 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
             final canStart = status == BookingStatus.confirmed;
             final canFinish = status == BookingStatus.inProgress;
             final hasDetails = service != null && pro != null;
-            final finishLabel = _isGeneratingReceipt ? 'Generating receipt...' : 'Finish job';
+            final finishLabel = _isGeneratingReceipt
+                ? 'Generating receipt...'
+                : 'Finish job';
             final statusIndex = switch (status) {
               BookingStatus.confirmed => 0,
               BookingStatus.inProgress => 1,
@@ -2089,7 +2620,7 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
                     ),
                   AppCard(
                     title: serviceTitle,
-                    subtitle: '$proName · $slotLabel',
+                    subtitle: '$proName - $slotLabel',
                     trailing: PillTag(
                       label: _bookingStatusLabel(booking.status),
                     ),
@@ -2154,10 +2685,10 @@ class _BookingDetailsPageState extends ConsumerState<BookingDetailsPage> {
                               expand: true,
                               onPressed: !_isGeneratingReceipt && hasDetails
                                   ? () => _completeBooking(
-                                        booking: booking,
-                                        service: service!,
-                                        pro: pro!,
-                                      )
+                                      booking: booking,
+                                      service: service!,
+                                      pro: pro!,
+                                    )
                                   : null,
                             ),
                         ],
@@ -2322,9 +2853,9 @@ class _KycPageState extends ConsumerState<KycPage> {
         );
       }
     } on Exception catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unable to pick images: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unable to pick images: $error')));
     } finally {
       if (mounted) {
         setState(() {
@@ -2338,9 +2869,9 @@ class _KycPageState extends ConsumerState<KycPage> {
     final profile = ref.read(userProfileProvider);
     final filtered = profile.kycDocuments.where((doc) => doc != path).toList();
     ref.read(userProfileProvider.notifier).updateKycDocuments(filtered);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Document removed')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Document removed')));
   }
 
   void _submitDocuments() {
@@ -2375,7 +2906,7 @@ class _KycPageState extends ConsumerState<KycPage> {
             child: Text(
               submitted
                   ? 'Our compliance team is reviewing your information. '
-                      'We\'ll notify you once the decision is ready.'
+                        'We\'ll notify you once the decision is ready.'
                   : 'Provide clear photos of a government ID and proof of address to unlock higher booking limits.',
               style: theme.textTheme.bodyMedium,
             ),
@@ -2409,10 +2940,7 @@ class _KycPageState extends ConsumerState<KycPage> {
                 ),
                 if (documents.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.medium),
-                  Text(
-                    'Selected files',
-                    style: theme.textTheme.titleSmall,
-                  ),
+                  Text('Selected files', style: theme.textTheme.titleSmall),
                   const SizedBox(height: AppSpacing.small),
                   ...documents.map(
                     (path) => Column(
@@ -2499,8 +3027,8 @@ class ProOnboardingPage extends ConsumerWidget {
                   expand: true,
                   onPressed: allComplete
                       ? () => context.pushNamed(
-                            AdminApprovalPendingPage.routeName,
-                          )
+                          AdminApprovalPendingPage.routeName,
+                        )
                       : null,
                 ),
                 const SizedBox(height: AppSpacing.small),
@@ -2564,15 +3092,12 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       body: ListView.separated(
         padding: const EdgeInsets.all(AppSpacing.medium),
         itemCount: notifications.length,
-        separatorBuilder: (_, __) =>
-            const SizedBox(height: AppSpacing.small),
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.small),
         itemBuilder: (context, index) {
           final entry = notifications[index];
           final iconData = _iconForType(entry.type);
-          final iconColor =
-              _colorForType(theme.colorScheme, entry.type);
-          final dateLabel =
-              localizations.formatMediumDate(entry.timestamp);
+          final iconColor = _colorForType(theme.colorScheme, entry.type);
+          final dateLabel = localizations.formatMediumDate(entry.timestamp);
           final timeLabel = localizations.formatTimeOfDay(
             TimeOfDay.fromDateTime(entry.timestamp),
             alwaysUse24HourFormat: true,
@@ -2594,7 +3119,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                   Text(entry.body),
                   const SizedBox(height: AppSpacing.small / 2),
                   Text(
-                    '$dateLabel · $timeLabel',
+                    '$dateLabel - $timeLabel',
                     style: theme.textTheme.bodySmall,
                   ),
                 ],
@@ -2602,8 +3127,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
               onTap: entry.isRead
                   ? null
                   : () => ref
-                      .read(notificationsProvider.notifier)
-                      .markRead(entry.id),
+                        .read(notificationsProvider.notifier)
+                        .markRead(entry.id),
             ),
           );
         },
@@ -2619,6 +3144,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         return Icons.account_balance_wallet_outlined;
       case NotificationType.review:
         return Icons.reviews_outlined;
+      case NotificationType.loyalty:
+        return Icons.card_giftcard;
     }
   }
 
@@ -2630,6 +3157,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         return colorScheme.secondary;
       case NotificationType.review:
         return colorScheme.tertiary;
+      case NotificationType.loyalty:
+        return colorScheme.primaryContainer;
     }
   }
 }
@@ -2672,7 +3201,8 @@ class AdminApprovalPendingPage extends ConsumerWidget {
     final profile = ref.watch(userProfileProvider);
     final onboardingSteps = ref.watch(proOnboardingProvider);
     final allStepsComplete =
-        onboardingSteps.isNotEmpty && onboardingSteps.every((s) => s.isComplete);
+        onboardingSteps.isNotEmpty &&
+        onboardingSteps.every((s) => s.isComplete);
     final kycSubmitted = profile.kycSubmitted;
 
     late final String statusLabel;
@@ -2701,10 +3231,7 @@ class AdminApprovalPendingPage extends ConsumerWidget {
           AppCard(
             title: 'Current status',
             trailing: PillTag(label: statusLabel),
-            child: Text(
-              statusMessage,
-              style: theme.textTheme.bodyMedium,
-            ),
+            child: Text(statusMessage, style: theme.textTheme.bodyMedium),
           ),
           AppCard(
             title: 'Checklist overview',
@@ -2720,18 +3247,14 @@ class AdminApprovalPendingPage extends ConsumerWidget {
                   ),
                   title: const Text('KYC documents'),
                   subtitle: Text(
-                    kycSubmitted
-                        ? 'Submitted'
-                        : 'Awaiting document submission',
+                    kycSubmitted ? 'Submitted' : 'Awaiting document submission',
                   ),
                 ),
                 const Divider(),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(
-                    allStepsComplete
-                        ? Icons.check_circle
-                        : Icons.error_outline,
+                    allStepsComplete ? Icons.check_circle : Icons.error_outline,
                     color: allStepsComplete
                         ? theme.colorScheme.primary
                         : theme.colorScheme.error,
@@ -2756,8 +3279,9 @@ class AdminApprovalPendingPage extends ConsumerWidget {
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content:
-                            Text('We\'ll notify you as soon as anything changes.'),
+                        content: Text(
+                          'We\'ll notify you as soon as anything changes.',
+                        ),
                       ),
                     );
                   },
@@ -2797,11 +3321,7 @@ class _AppShellScaffold extends StatelessWidget {
         titleSpacing: 0,
         title: Row(
           children: [
-            Icon(
-              icon,
-              size: 28,
-              color: colorScheme.onSurfaceVariant,
-            ),
+            Icon(icon, size: 28, color: colorScheme.onSurfaceVariant),
             const SizedBox(width: AppSpacing.medium),
             Text(title),
           ],
@@ -2810,12 +3330,12 @@ class _AppShellScaffold extends StatelessWidget {
           Consumer(
             builder: (context, ref, _) {
               final notifications = ref.watch(notificationsProvider);
-              final unreadCount =
-                  notifications.where((entry) => !entry.isRead).length;
+              final unreadCount = notifications
+                  .where((entry) => !entry.isRead)
+                  .length;
               return IconButton(
                 tooltip: 'Notifications',
-                onPressed: () =>
-                    context.pushNamed(NotificationsPage.routeName),
+                onPressed: () => context.pushNamed(NotificationsPage.routeName),
                 icon: Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -2830,18 +3350,15 @@ class _AppShellScaffold extends StatelessWidget {
                             color: colorScheme.error,
                             shape: BoxShape.circle,
                           ),
-                          constraints:
-                              const BoxConstraints(minWidth: 18, minHeight: 18),
+                          constraints: const BoxConstraints(
+                            minWidth: 18,
+                            minHeight: 18,
+                          ),
                           child: Center(
                             child: Text(
                               unreadCount > 9 ? '9+' : '$unreadCount',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                  ),
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(color: Colors.white, fontSize: 10),
                             ),
                           ),
                         ),
@@ -2877,10 +3394,7 @@ class _PageShowcase extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.medium),
         children: [
-          Text(
-            description,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
+          Text(description, style: Theme.of(context).textTheme.bodyLarge),
           const SizedBox(height: AppSpacing.large),
           ..._addVerticalSpacing(children),
         ],
@@ -3132,7 +3646,7 @@ class _BookingListItem extends ConsumerWidget {
     final theme = Theme.of(context);
     final localizations = MaterialLocalizations.of(context);
     final slotLabel =
-        '${localizations.formatMediumDate(booking.slot)} • ${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(booking.slot), alwaysUse24HourFormat: true)}';
+        '${localizations.formatMediumDate(booking.slot)} - ${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(booking.slot), alwaysUse24HourFormat: true)}';
     final serviceTitle = service?.title ?? 'Service ${booking.serviceId}';
     final proName = pro?.name ?? 'Professional ${booking.proId}';
     final statusLabel = _bookingStatusLabel(booking.status);

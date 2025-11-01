@@ -44,7 +44,7 @@ void main() {
     baseLocation: const GeoPoint(lat: 12.34, lng: 56.78),
   );
 
-  ProviderContainer _createContainer() {
+  ProviderContainer createContainer() {
     return ProviderContainer(overrides: [
       serviceByIdProvider.overrideWith((ref, id) async {
         if (id == testService.id) {
@@ -61,7 +61,7 @@ void main() {
     ]);
   }
 
-  Future<void> _openReviewSheet(
+  Future<void> openReviewSheet(
     WidgetTester tester,
     ProviderContainer container,
   ) async {
@@ -97,10 +97,10 @@ void main() {
 
   group('ReviewSheet', () {
     testWidgets('saves a review without opening a ticket', (tester) async {
-      final container = _createContainer();
+      final container = createContainer();
       addTearDown(container.dispose);
 
-      await _openReviewSheet(tester, container);
+      await openReviewSheet(tester, container);
 
       await tester.enterText(
         find.byType(TextField),
@@ -119,10 +119,10 @@ void main() {
     });
 
     testWidgets('creates a ticket when rating is below three', (tester) async {
-      final container = _createContainer();
+      final container = createContainer();
       addTearDown(container.dispose);
 
-      await _openReviewSheet(tester, container);
+      await openReviewSheet(tester, container);
 
       // Select a low rating.
       await tester.tap(find.byIcon(Icons.star).at(1));

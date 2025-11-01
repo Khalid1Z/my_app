@@ -1,82 +1,875 @@
-[
-  {
-    "id": "svc_clean_standard",
-    "title": "Standard Home Cleaning",
-    "category": "Cleaning",
-    "durationMin": 120,
-    "basePrice": 75.0,
-    "thumbUrl": "https://picsum.photos/seed/clean1/400/280"
+{
+  "Beauty": {
+    "Waxing": [
+      {
+        "id": "svc_beauty_waxing_aisselles",
+        "title": "Waxing - Aisselles",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 30.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_aisselles/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_bords_de_maillot",
+        "title": "Waxing - Bords de maillot",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 50.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_bords_de_maillot/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_bras_complets",
+        "title": "Waxing - Bras complets",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 70.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_bras_complets/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_demi_bras",
+        "title": "Waxing - Demi bras",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 50.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_demi_bras/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_demi_jambes",
+        "title": "Waxing - Demi-jambes",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 60.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_demi_jambes/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_dos",
+        "title": "Waxing - Dos",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 70.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_dos/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_duvet",
+        "title": "Waxing - Duvet",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 20.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_duvet/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_fessier",
+        "title": "Waxing - Fessier",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 50.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_fessier/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_jambes_compla_tes",
+        "title": "Waxing - Jambes complA tes",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 100.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_jambes_compla_tes/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_maillot_simple",
+        "title": "Waxing - Maillot simple",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 90.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_maillot_simple/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_narines",
+        "title": "Waxing - Narines",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 15.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_narines/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_orteils",
+        "title": "Waxing - Orteils",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 20.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_orteils/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_pointe_du_menton",
+        "title": "Waxing - Pointe du menton",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 20.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_pointe_du_menton/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_ventre",
+        "title": "Waxing - Ventre",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 50.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_ventre/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_visage_complet",
+        "title": "Waxing - Visage complet",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 60,
+        "basePrice": 90.0,
+        "thumbUrl": "https://picsum.photos/seed/waxing_visage_complet/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_pro_mastery_workshop",
+        "title": "Professional - Advanced waxing mastery workshop",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 180,
+        "basePrice": 890.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_waxing_mastery/400/280"
+      },
+      {
+        "id": "svc_beauty_waxing_pro_studio_setup",
+        "title": "Professional - Wax studio business setup",
+        "category": "Beauty",
+        "subcategory": "Waxing",
+        "durationMin": 150,
+        "basePrice": 760.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_waxing_setup/400/280"
+      }
+    ],
+    "Manicure": [
+      {
+        "id": "svc_beauty_artificial_nails_acrylique",
+        "title": "Artificial Nails - Acrylique",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 600.0,
+        "thumbUrl": "https://picsum.photos/seed/artificial_nails_acrylique/400/280"
+      },
+      {
+        "id": "svc_beauty_artificial_nails_faux_ongles",
+        "title": "Artificial Nails - Faux ongles",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 150.0,
+        "thumbUrl": "https://picsum.photos/seed/artificial_nails_faux_ongles/400/280"
+      },
+      {
+        "id": "svc_beauty_artificial_nails_gel_technique_biab",
+        "title": "Artificial Nails - Gel technique BIAB",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 300.0,
+        "thumbUrl": "https://picsum.photos/seed/artificial_nails_gel_technique_biab/400/280"
+      },
+      {
+        "id": "svc_beauty_artificial_nails_gel_vernis_permanent",
+        "title": "Artificial Nails - Gel vernis permanent",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 350.0,
+        "thumbUrl": "https://picsum.photos/seed/artificial_nails_gel_vernis_permanent/400/280"
+      },
+      {
+        "id": "svc_beauty_artificial_nails_ongles_en_gel",
+        "title": "Artificial Nails - Ongles en gel",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 300.0,
+        "thumbUrl": "https://picsum.photos/seed/artificial_nails_ongles_en_gel/400/280"
+      },
+      {
+        "id": "svc_beauty_artificial_nails_polygel",
+        "title": "Artificial Nails - Polygel",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 300.0,
+        "thumbUrl": "https://picsum.photos/seed/artificial_nails_polygel/400/280"
+      },
+      {
+        "id": "svc_beauty_artificial_nails_remplissage_gel",
+        "title": "Artificial Nails - Remplissage gel",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 300.0,
+        "thumbUrl": "https://picsum.photos/seed/artificial_nails_remplissage_gel/400/280"
+      },
+      {
+        "id": "svc_beauty_foot_care_padicure_spa",
+        "title": "Foot Care - PAdicure SPA",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 150.0,
+        "thumbUrl": "https://picsum.photos/seed/foot_care_padicure_spa/400/280"
+      },
+      {
+        "id": "svc_beauty_foot_care_padicure_madicale",
+        "title": "Foot Care - PAdicure mAdicale",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 200.0,
+        "thumbUrl": "https://picsum.photos/seed/foot_care_padicure_madicale/400/280"
+      },
+      {
+        "id": "svc_beauty_foot_care_padicure_sans_pose_vernis",
+        "title": "Foot Care - PAdicure sans pose vernis",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 100.0,
+        "thumbUrl": "https://picsum.photos/seed/foot_care_padicure_sans_pose_vernis/400/280"
+      },
+      {
+        "id": "svc_beauty_manicure_manucure_spa",
+        "title": "Manicure - Manucure SPA",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 150.0,
+        "thumbUrl": "https://picsum.photos/seed/manicure_manucure_spa/400/280"
+      },
+      {
+        "id": "svc_beauty_manicure_manucure_sans_pose_vernis",
+        "title": "Manicure - Manucure sans pose vernis",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 70.0,
+        "thumbUrl": "https://picsum.photos/seed/manicure_manucure_sans_pose_vernis/400/280"
+      },
+      {
+        "id": "svc_beauty_nail_polish_dapose_vernis_permanent",
+        "title": "Nail Polish - DApose vernis permanent",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 50.0,
+        "thumbUrl": "https://picsum.photos/seed/nail_polish_dapose_vernis_permanent/400/280"
+      },
+      {
+        "id": "svc_beauty_nail_polish_pose_vernis_normal",
+        "title": "Nail Polish - Pose vernis normal",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 40.0,
+        "thumbUrl": "https://picsum.photos/seed/nail_polish_pose_vernis_normal/400/280"
+      },
+      {
+        "id": "svc_beauty_nail_polish_pose_vernis_permanent",
+        "title": "Nail Polish - Pose vernis permanent",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 60,
+        "basePrice": 100.0,
+        "thumbUrl": "https://picsum.photos/seed/nail_polish_pose_vernis_permanent/400/280"
+      },
+      {
+        "id": "svc_beauty_manicure_pro_art_masterclass",
+        "title": "Professional - Nail art masterclass",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 210,
+        "basePrice": 980.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_manicure_masterclass/400/280"
+      },
+      {
+        "id": "svc_beauty_manicure_pro_salon_coaching",
+        "title": "Professional - Manicure salon coaching session",
+        "category": "Beauty",
+        "subcategory": "Manicure",
+        "durationMin": 120,
+        "basePrice": 720.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_manicure_coaching/400/280"
+      }
+    ],
+    "Beauty Services": [
+      {
+        "id": "svc_beauty_body_treatments_massage_amincissant",
+        "title": "Body Treatments - Massage amincissant",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 60,
+        "basePrice": 300.0,
+        "thumbUrl": "https://picsum.photos/seed/body_treatments_massage_amincissant/400/280"
+      },
+      {
+        "id": "svc_beauty_body_treatments_massage_drainant",
+        "title": "Body Treatments - Massage drainant",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 60,
+        "basePrice": 500.0,
+        "thumbUrl": "https://picsum.photos/seed/body_treatments_massage_drainant/400/280"
+      },
+      {
+        "id": "svc_beauty_body_treatments_massage_lifting_colombien",
+        "title": "Body Treatments - Massage lifting colombien",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 60,
+        "basePrice": 200.0,
+        "thumbUrl": "https://picsum.photos/seed/body_treatments_massage_lifting_colombien/400/280"
+      },
+      {
+        "id": "svc_beauty_body_treatments_massage_relaxanttonifiant",
+        "title": "Body Treatments - Massage relaxanttonifiant",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 60,
+        "basePrice": 200.0,
+        "thumbUrl": "https://picsum.photos/seed/body_treatments_massage_relaxanttonifiant/400/280"
+      },
+      {
+        "id": "svc_beauty_facial_treatments_soin_aclat",
+        "title": "Facial Treatments - Soin Aclat",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 75,
+        "basePrice": 500.0,
+        "thumbUrl": "https://picsum.photos/seed/facial_treatments_soin_aclat/400/280"
+      },
+      {
+        "id": "svc_beauty_facial_treatments_soin_anti_age",
+        "title": "Facial Treatments - Soin anti-Age",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 75,
+        "basePrice": 700.0,
+        "thumbUrl": "https://picsum.photos/seed/facial_treatments_soin_anti_age/400/280"
+      },
+      {
+        "id": "svc_beauty_facial_treatments_soin_express",
+        "title": "Facial Treatments - Soin express",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 75,
+        "basePrice": 250.0,
+        "thumbUrl": "https://picsum.photos/seed/facial_treatments_soin_express/400/280"
+      },
+      {
+        "id": "svc_beauty_facial_treatments_soin_hydrafacial",
+        "title": "Facial Treatments - Soin hydrafacial",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 75,
+        "basePrice": 700.0,
+        "thumbUrl": "https://picsum.photos/seed/facial_treatments_soin_hydrafacial/400/280"
+      },
+      {
+        "id": "svc_beauty_facial_treatments_soin_profond",
+        "title": "Facial Treatments - Soin profond",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 75,
+        "basePrice": 400.0,
+        "thumbUrl": "https://picsum.photos/seed/facial_treatments_soin_profond/400/280"
+      },
+      {
+        "id": "svc_beauty_lash_extensions_cils_permanents_glamour",
+        "title": "Lash Extensions - Cils permanents (glamour)",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 15,
+        "basePrice": 700.0,
+        "thumbUrl": "https://picsum.photos/seed/lash_extensions_cils_permanents_glamour/400/280"
+      },
+      {
+        "id": "svc_beauty_lash_extensions_cils_permanents_naturel",
+        "title": "Lash Extensions - Cils permanents (naturel)",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 15,
+        "basePrice": 1000.0,
+        "thumbUrl": "https://picsum.photos/seed/lash_extensions_cils_permanents_naturel/400/280"
+      },
+      {
+        "id": "svc_beauty_lash_extensions_cils_permanents_russe",
+        "title": "Lash Extensions - Cils permanents (russe)",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 15,
+        "basePrice": 900.0,
+        "thumbUrl": "https://picsum.photos/seed/lash_extensions_cils_permanents_russe/400/280"
+      },
+      {
+        "id": "svc_beauty_lash_extensions_dapose_cils_permanents",
+        "title": "Lash Extensions - DApose cils permanents",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 15,
+        "basePrice": 200.0,
+        "thumbUrl": "https://picsum.photos/seed/lash_extensions_dapose_cils_permanents/400/280"
+      },
+      {
+        "id": "svc_beauty_lash_extensions_faux_cils_pose_bouquet",
+        "title": "Lash Extensions - Faux cils (pose bouquet)",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 15,
+        "basePrice": 150.0,
+        "thumbUrl": "https://picsum.photos/seed/lash_extensions_faux_cils_pose_bouquet/400/280"
+      },
+      {
+        "id": "svc_beauty_makeup_maquillage_flash",
+        "title": "Makeup - Maquillage flash",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 15,
+        "basePrice": 150.0,
+        "thumbUrl": "https://picsum.photos/seed/makeup_maquillage_flash/400/280"
+      },
+      {
+        "id": "svc_beauty_makeup_maquillage_jour",
+        "title": "Makeup - Maquillage jour",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 60,
+        "basePrice": 250.0,
+        "thumbUrl": "https://picsum.photos/seed/makeup_maquillage_jour/400/280"
+      },
+      {
+        "id": "svc_beauty_makeup_maquillage_mariage",
+        "title": "Makeup - Maquillage mariage",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 60,
+        "basePrice": 750.0,
+        "thumbUrl": "https://picsum.photos/seed/makeup_maquillage_mariage/400/280"
+      },
+      {
+        "id": "svc_beauty_makeup_maquillage_soirae",
+        "title": "Makeup - Maquillage soirAe",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 60,
+        "basePrice": 500.0,
+        "thumbUrl": "https://picsum.photos/seed/makeup_maquillage_soirae/400/280"
+      },
+      {
+        "id": "svc_beauty_tinting_teinture_cils",
+        "title": "Tinting - Teinture cils",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 60,
+        "basePrice": 100.0,
+        "thumbUrl": "https://picsum.photos/seed/tinting_teinture_cils/400/280"
+      },
+      {
+        "id": "svc_beauty_tinting_teinture_sourcils",
+        "title": "Tinting - Teinture sourcils",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 60,
+        "basePrice": 100.0,
+        "thumbUrl": "https://picsum.photos/seed/tinting_teinture_sourcils/400/280"
+      },
+      {
+        "id": "svc_beauty_services_pro_facial_protocols",
+        "title": "Professional - Facial protocol certification",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 240,
+        "basePrice": 1250.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_facial_cert/400/280"
+      },
+      {
+        "id": "svc_beauty_services_pro_spa_strategy",
+        "title": "Professional - Spa strategy coaching",
+        "category": "Beauty",
+        "subcategory": "Beauty Services",
+        "durationMin": 135,
+        "basePrice": 880.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_spa_strategy/400/280"
+      }
+    ]
   },
-  {
-    "id": "svc_clean_deep",
-    "title": "Deep Cleaning Deluxe",
-    "category": "Cleaning",
-    "durationMin": 180,
-    "basePrice": 129.0,
-    "thumbUrl": "https://picsum.photos/seed/clean2/400/280"
+  "Hair": {
+    "Hair Services": [
+      {
+        "id": "svc_hair_color_services_balayage",
+        "title": "Color Services - Balayage",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 300.0,
+        "thumbUrl": "https://picsum.photos/seed/color_services_balayage/400/280"
+      },
+      {
+        "id": "svc_hair_color_services_balayage_sans_patine",
+        "title": "Color Services - Balayage sans patine",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 500.0,
+        "thumbUrl": "https://picsum.photos/seed/color_services_balayage_sans_patine/400/280"
+      },
+      {
+        "id": "svc_hair_color_services_coloration_racines",
+        "title": "Color Services - Coloration racines",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 150.0,
+        "thumbUrl": "https://picsum.photos/seed/color_services_coloration_racines/400/280"
+      },
+      {
+        "id": "svc_hair_color_services_couleur_sans_ammoniaque",
+        "title": "Color Services - Couleur sans ammoniaque",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 300.0,
+        "thumbUrl": "https://picsum.photos/seed/color_services_couleur_sans_ammoniaque/400/280"
+      },
+      {
+        "id": "svc_hair_color_services_dacoloration_extraame",
+        "title": "Color Services - DAcoloration extrAame",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 500.0,
+        "thumbUrl": "https://picsum.photos/seed/color_services_dacoloration_extraame/400/280"
+      },
+      {
+        "id": "svc_hair_color_services_effet_ombra",
+        "title": "Color Services - Effet ombrA",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 800.0,
+        "thumbUrl": "https://picsum.photos/seed/color_services_effet_ombra/400/280"
+      },
+      {
+        "id": "svc_hair_color_services_ma_ches_cheveux_courts",
+        "title": "Color Services - MA ches (cheveux courts)",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 300.0,
+        "thumbUrl": "https://picsum.photos/seed/color_services_ma_ches_cheveux_courts/400/280"
+      },
+      {
+        "id": "svc_hair_color_services_ma_ches_cheveux_longs",
+        "title": "Color Services - MA ches (cheveux longs)",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 450.0,
+        "thumbUrl": "https://picsum.photos/seed/color_services_ma_ches_cheveux_longs/400/280"
+      },
+      {
+        "id": "svc_hair_color_services_patine_colorante_post_ma_ches",
+        "title": "Color Services - Patine colorante (post-mA ches)",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 250.0,
+        "thumbUrl": "https://picsum.photos/seed/color_services_patine_colorante_post_ma_ches/400/280"
+      },
+      {
+        "id": "svc_hair_color_services_rinaage_patine_laga_re",
+        "title": "Color Services - RinAage  patine lAgA re",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 200.0,
+        "thumbUrl": "https://picsum.photos/seed/color_services_rinaage_patine_laga_re/400/280"
+      },
+      {
+        "id": "svc_hair_event_styling_chignon_simple",
+        "title": "Event Styling - Chignon simple",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 250.0,
+        "thumbUrl": "https://picsum.photos/seed/event_styling_chignon_simple/400/280"
+      },
+      {
+        "id": "svc_hair_event_styling_chignon_spacial_artistique",
+        "title": "Event Styling - Chignon spAcial  artistique",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 800.0,
+        "thumbUrl": "https://picsum.photos/seed/event_styling_chignon_spacial_artistique/400/280"
+      },
+      {
+        "id": "svc_hair_event_styling_coiffure_mariage",
+        "title": "Event Styling - Coiffure mariage",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 2500.0,
+        "thumbUrl": "https://picsum.photos/seed/event_styling_coiffure_mariage/400/280"
+      },
+      {
+        "id": "svc_hair_event_styling_coiffure_soirae",
+        "title": "Event Styling - Coiffure soirAe",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 375.0,
+        "thumbUrl": "https://picsum.photos/seed/event_styling_coiffure_soirae/400/280"
+      },
+      {
+        "id": "svc_hair_event_styling_pack_mariage_complet",
+        "title": "Event Styling - Pack mariage complet",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 4500.0,
+        "thumbUrl": "https://picsum.photos/seed/event_styling_pack_mariage_complet/400/280"
+      },
+      {
+        "id": "svc_hair_hair_care_bain_de_karatine",
+        "title": "Hair Care - Bain de kAratine",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 60,
+        "basePrice": 600.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_care_bain_de_karatine/400/280"
+      },
+      {
+        "id": "svc_hair_hair_care_botox_capillaire",
+        "title": "Hair Care - Botox capillaire",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 60,
+        "basePrice": 1000.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_care_botox_capillaire/400/280"
+      },
+      {
+        "id": "svc_hair_hair_care_karatine_lissage_complet",
+        "title": "Hair Care - KAratine lissage complet",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 60,
+        "basePrice": 800.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_care_karatine_lissage_complet/400/280"
+      },
+      {
+        "id": "svc_hair_hair_care_lissage_protaine",
+        "title": "Hair Care - Lissage ProtAine",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 60,
+        "basePrice": 1000.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_care_lissage_protaine/400/280"
+      },
+      {
+        "id": "svc_hair_hair_care_lissage_racine_entretien",
+        "title": "Hair Care - Lissage racine (entretien)",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 60,
+        "basePrice": 500.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_care_lissage_racine_entretien/400/280"
+      },
+      {
+        "id": "svc_hair_hair_care_soin_cheveux_secscolorasabamas",
+        "title": "Hair Care - Soin cheveux secscolorAsabAmAs",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 150.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_care_soin_cheveux_secscolorasabamas/400/280"
+      },
+      {
+        "id": "svc_hair_hair_extensions_dapose_extensions",
+        "title": "Hair Extensions - DApose extensions",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 250.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_extensions_dapose_extensions/400/280"
+      },
+      {
+        "id": "svc_hair_hair_extensions_extensions_bande_adhasive",
+        "title": "Hair Extensions - Extensions bande adhAsive",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 70.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_extensions_extensions_bande_adhasive/400/280"
+      },
+      {
+        "id": "svc_hair_hair_extensions_extensions_tissage_avec_ou_sans_che",
+        "title": "Hair Extensions - Extensions tissage (avec ou sans cheveux)",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 1500.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_extensions_extensions_tissage_avec_ou_sans_cheveux/400/280"
+      },
+      {
+        "id": "svc_hair_hair_extensions_pose_extensions",
+        "title": "Hair Extensions - Pose extensions",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 120,
+        "basePrice": 300.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_extensions_pose_extensions/400/280"
+      },
+      {
+        "id": "svc_hair_hair_styling_boucla_wavy",
+        "title": "Hair Styling - BouclA (wavy",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 250.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_styling_boucla_wavy/400/280"
+      },
+      {
+        "id": "svc_hair_hair_styling_brushing_cheveux_courts",
+        "title": "Hair Styling - Brushing (cheveux courts)",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 50.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_styling_brushing_cheveux_courts/400/280"
+      },
+      {
+        "id": "svc_hair_hair_styling_brushing_cheveux_longs",
+        "title": "Hair Styling - Brushing (cheveux longs)",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 100.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_styling_brushing_cheveux_longs/400/280"
+      },
+      {
+        "id": "svc_hair_hair_styling_chignon_simple",
+        "title": "Hair Styling - Chignon simple",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 200.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_styling_chignon_simple/400/280"
+      },
+      {
+        "id": "svc_hair_hair_styling_chignon_spacial_artistique",
+        "title": "Hair Styling - Chignon spAcial  artistique",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 600.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_styling_chignon_spacial_artistique/400/280"
+      },
+      {
+        "id": "svc_hair_hair_styling_coiffure_babyliss",
+        "title": "Hair Styling - Coiffure Babyliss",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 150.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_styling_coiffure_babyliss/400/280"
+      },
+      {
+        "id": "svc_hair_hair_styling_coupe_transformation",
+        "title": "Hair Styling - Coupe transformation",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 120.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_styling_coupe_transformation/400/280"
+      },
+      {
+        "id": "svc_hair_hair_styling_pointes_rafraachissement",
+        "title": "Hair Styling - Pointes (rafraAchissement)",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 45,
+        "basePrice": 60.0,
+        "thumbUrl": "https://picsum.photos/seed/hair_styling_pointes_rafraachissement/400/280"
+      },
+      {
+        "id": "svc_hair_services_pro_cutting_lab",
+        "title": "Professional - Creative cutting lab",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 180,
+        "basePrice": 1150.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_hair_cutting/400/280"
+      },
+      {
+        "id": "svc_hair_services_pro_business_bootcamp",
+        "title": "Professional - Salon business bootcamp",
+        "category": "Hair",
+        "subcategory": "Hair Services",
+        "durationMin": 210,
+        "basePrice": 990.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_hair_bootcamp/400/280"
+      }
+    ]
   },
-  {
-    "id": "svc_laundry",
-    "title": "Laundry & Folding",
-    "category": "Lifestyle",
-    "durationMin": 90,
-    "basePrice": 45.0,
-    "thumbUrl": "https://picsum.photos/seed/laundry/400/280"
-  },
-  {
-    "id": "svc_plumbing_inspect",
-    "title": "Plumbing Inspection",
-    "category": "Repairs",
-    "durationMin": 60,
-    "basePrice": 80.0,
-    "thumbUrl": "https://picsum.photos/seed/plumbing/400/280"
-  },
-  {
-    "id": "svc_electrical_fix",
-    "title": "Electrical Fix & Safety",
-    "category": "Repairs",
-    "durationMin": 75,
-    "basePrice": 95.0,
-    "thumbUrl": "https://picsum.photos/seed/electrical/400/280"
-  },
-  {
-    "id": "svc_hvac_tuneup",
-    "title": "HVAC Seasonal Tune-up",
-    "category": "Maintenance",
-    "durationMin": 120,
-    "basePrice": 150.0,
-    "thumbUrl": "https://picsum.photos/seed/hvac/400/280"
-  },
-  {
-    "id": "svc_garden_refresh",
-    "title": "Garden Refresh",
-    "category": "Outdoor",
-    "durationMin": 150,
-    "basePrice": 110.0,
-    "thumbUrl": "https://picsum.photos/seed/garden/400/280"
-  },
-  {
-    "id": "svc_pest_control",
-    "title": "Eco Pest Control",
-    "category": "Maintenance",
-    "durationMin": 90,
-    "basePrice": 135.0,
-    "thumbUrl": "https://picsum.photos/seed/pest/400/280"
-  },
-  {
-    "id": "svc_moving_help",
-    "title": "Moving & Packing Help",
-    "category": "Logistics",
-    "durationMin": 210,
-    "basePrice": 180.0,
-    "thumbUrl": "https://picsum.photos/seed/moving/400/280"
-  },
-  {
-    "id": "svc_pet_care",
-    "title": "Pet Sitting & Care",
-    "category": "Lifestyle",
-    "durationMin": 120,
-    "basePrice": 65.0,
-    "thumbUrl": "https://picsum.photos/seed/petcare/400/280"
+  "Professional": {
+    "Business Support": [
+      {
+        "id": "svc_pro_business_brand_photoshoot",
+        "title": "Professional - Brand photoshoot package",
+        "category": "Professional",
+        "subcategory": "Business Support",
+        "durationMin": 120,
+        "basePrice": 950.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_brand_photoshoot/400/280"
+      },
+      {
+        "id": "svc_pro_business_finance_clinic",
+        "title": "Professional - Finance & pricing clinic",
+        "category": "Professional",
+        "subcategory": "Business Support",
+        "durationMin": 90,
+        "basePrice": 650.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_finance_clinic/400/280"
+      }
+    ],
+    "Education": [
+      {
+        "id": "svc_pro_education_masterclass_lashes",
+        "title": "Professional - Advanced lashes masterclass",
+        "category": "Professional",
+        "subcategory": "Education",
+        "durationMin": 180,
+        "basePrice": 1200.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_masterclass_lashes/400/280"
+      },
+      {
+        "id": "svc_pro_education_safety_certification",
+        "title": "Professional - Salon safety certification",
+        "category": "Professional",
+        "subcategory": "Education",
+        "durationMin": 150,
+        "basePrice": 890.0,
+        "thumbUrl": "https://picsum.photos/seed/pro_safety_certification/400/280"
+      }
+    ]
   }
-]
+}

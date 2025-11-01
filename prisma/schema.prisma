@@ -1,0 +1,219 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "node_modules/@prisma/client"
+}
+
+enum UserRole {
+  USER
+  PRO
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  PAID
+  IN_PROGRESS
+  DONE
+  CANCELED
+}
+
+enum WalletTransactionType {
+  TOPUP
+  CHARGE
+  REFUND
+  PAYOUT
+  HOLD
+  RELEASE
+}
+
+enum TicketStatus {
+  OPEN
+  ASSIGNED
+  RESOLVED
+  REFUNDED
+  REBOOKED
+}
+
+enum KYCDocumentType {
+  CIN
+  SELFIE
+  OTHER
+}
+
+enum KYCDocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  name         String?
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  role         UserRole @default(USER)
+
+  proProfile   ProProfile?
+  wallet       WalletAccount?
+  bookings     Booking[]      @relation("UserBookings")
+  tickets      Ticket[]
+  kycDocuments KYCDocument[]
+  reviews      Review[]
+}
+
+model ServiceCategory {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  services Service[]
+}
+
+model Service {
+  id          String  @id @default(uuid())
+  title       String
+  durationMin Int
+  basePrice   Decimal @db.Decimal(10, 2)
+  categoryId  String
+
+  category ServiceCategory @relation(fields: [categoryId], references: [id])
+  proLinks ProSkill[]
+  bookings Booking[]
+}
+
+model ProProfile {
+  id         String    @id @default(uuid())
+  userId     String    @unique
+  bio        String?
+  baseLat    Float?
+  baseLng    Float?
+  approvedAt DateTime?
+
+  user         User               @relation(fields: [userId], references: [id])
+  skills       ProSkill[]
+  availability AvailabilitySlot[]
+  bookings     Booking[]          @relation("ProBookings")
+}
+
+model ProSkill {
+  proId      String
+  serviceId  String
+  assignedAt DateTime @default(now())
+
+  pro     ProProfile @relation(fields: [proId], references: [id])
+  service Service    @relation(fields: [serviceId], references: [id])
+
+  @@id([proId, serviceId])
+  @@index([serviceId])
+}
+
+model AvailabilitySlot {
+  id     String   @id @default(uuid())
+  proId  String
+  start  DateTime
+  end    DateTime
+  isOpen Boolean  @default(true)
+
+  pro ProProfile @relation(fields: [proId], references: [id])
+
+  @@index([proId, start, end])
+}
+
+model Booking {
+  id               String        @id @default(uuid())
+  userId           String
+  proId            String
+  serviceId        String
+  start            DateTime
+  end              DateTime
+  address          String
+  city             String
+  status           BookingStatus @default(PENDING)
+  total            Decimal       @db.Decimal(10, 2)
+  arrivalAlertSent Boolean       @default(false)
+  invoiceUrl       String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  user    User       @relation("UserBookings", fields: [userId], references: [id])
+  pro     ProProfile @relation("ProBookings", fields: [proId], references: [id])
+  service Service    @relation(fields: [serviceId], references: [id])
+  review  Review?
+  ticket  Ticket?    @relation("BookingTicket")
+
+  @@index([userId])
+  @@index([proId])
+  @@index([serviceId])
+  @@index([status])
+}
+
+model WalletAccount {
+  id      String  @id @default(uuid())
+  userId  String  @unique
+  balance Decimal @default(0) @db.Decimal(18, 2)
+
+  user         User                @relation(fields: [userId], references: [id])
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id        String                @id @default(uuid())
+  walletId  String
+  type      WalletTransactionType
+  amount    Decimal               @db.Decimal(18, 2)
+  createdAt DateTime              @default(now())
+
+  wallet WalletAccount @relation(fields: [walletId], references: [id])
+
+  @@index([walletId, createdAt])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  bookingId String   @unique
+  userId    String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Ticket {
+  id          String       @id @default(uuid())
+  userId      String
+  bookingId   String?      @unique
+  status      TicketStatus @default(OPEN)
+  slaBreached Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id])
+  booking Booking? @relation("BookingTicket", fields: [bookingId], references: [id])
+
+  @@index([status])
+}
+
+model KYCDocument {
+  id          String            @id @default(uuid())
+  userId      String
+  type        KYCDocumentType
+  url         String
+  status      KYCDocumentStatus @default(PENDING)
+  submittedAt DateTime          @default(now())
+  reviewedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+}

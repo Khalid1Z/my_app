@@ -42,7 +42,7 @@ final proOnboardingProvider =
 });
 
 class ProOnboardingNotifier extends StateNotifier<List<ProOnboardingStep>> {
-  ProOnboardingNotifier(List<ProOnboardingStep> initial) : super(initial);
+  ProOnboardingNotifier(super.initial);
 
   void toggleStep(String id, bool isComplete) {
     state = [
